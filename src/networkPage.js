@@ -1,30 +1,53 @@
-import {   
+import {
   MDBCard,
   MDBCardBody,
   MDBCardTitle,
   MDBCardText,
   MDBCardImage,
   MDBRow,
-  MDBCol
- } from 'mdb-react-ui-kit'; 
+  MDBCol,
+  MDBTypography,
+} from "mdb-react-ui-kit"
 
-import ContactForm from "./form";
+import ContactForm from "./form"
 
 function Solar() {
-  return (    
+  return (
     <MDBCard>
-      <MDBCardImage src='https://mdbootstrap.com/img/Photos/Slides/img%20(16).jpg' position='top' alt='Síťová řešení' />
+      <MDBCardImage
+        src="/images/notebook.jpeg"
+        position="top"
+        alt="IT řešení Elinet services"
+      />
       <MDBCardBody>
-        <MDBCardTitle>Síťová řešení</MDBCardTitle>
+        <MDBCardTitle>IT Služby</MDBCardTitle>
         <MDBRow>
           <MDBCol md={8}>
             <MDBCardText>
-              <MDBRow className='mb-4'>
+              <MDBRow className="mb-4">
                 <MDBCol>
-                  Pro Váš rodinný dům nabízíme různorodé fotovoltaické střešní systémy jako jsou solární taška, solární panel nebo solární fásáda. K fotovoltaické elektrárně dokážeme nakombinovat další technologie jako je tepelné čerpadlo, bateriové uložiště nebo dobíjecí stanice pro elektromobily.<br/><br/>
-                </MDBCol>
-                <MDBCol>
-                  Vybrané technologie navrhujeme vždy na míru na základě prvotní analýzy proveditelnosti daného objektu.
+                  <MDBTypography listUnStyled className="mb-0">
+                    <li>
+                      Zajišťujeme prvoz a implementaci IT systémů postavených na
+                      následujících řešeních:{" "}
+                      <ul>
+                        <li>
+                          Google Workspace pro zajištění základního fungování
+                          společnosti (email, sdílení dokumentů). Zároveň
+                          vyvíjeme aplikace v prostředí Google Apps Script.{" "}
+                        </li>
+                        <li>
+                          Mikrotik a Cisco pro zajištění kompletního řešení
+                          sítí. Většinu řešení stavíme na komponentách Mikrotik
+                          a pro korporátní klientelu dodáváme Cosco.
+                        </li>
+                        <li>
+                          ReactJSD a MDB Bootstrap pro vývoj responsivních
+                          webových stránek a aplikací.
+                        </li>
+                      </ul>
+                    </li>
+                  </MDBTypography>
                 </MDBCol>
               </MDBRow>
             </MDBCardText>
@@ -32,10 +55,10 @@ function Solar() {
           <MDBCol md={4}>
             <ContactForm />
           </MDBCol>
-        </MDBRow>          
+        </MDBRow>
       </MDBCardBody>
     </MDBCard>
-  );
+  )
 }
 
-export default Solar;
+export default Solar
