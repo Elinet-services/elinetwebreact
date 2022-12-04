@@ -11,11 +11,11 @@ code {
 }
 
 .navbar-brand img {
-  max-width: 234px;
+  max-width: 55%;
 }
 div .formHead {
-  background-color: #82CE2B;
-  color: white;
+  background-color: #C7C7C7;
+  color: #DADADA;
   padding: 20px 10px 20px 30px;
 }
 
