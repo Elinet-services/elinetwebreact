@@ -5,16 +5,15 @@ import {
   MDBTextArea,
   MDBBtn
 } from 'mdb-react-ui-kit';
-import { Navigate } from 'react-router-dom';
 
-function contactForm()
+function ContactForm()
 {
   const [submited, setSubmited] = useState(false);
   const [error, setError] = useState(false);
   const [responseMessage, setResponseMessage] = useState();
   const [formValue, setFormValue] = useState({
-    name: 'Karel',
-    email: 'slajer@seznam.cz',
+    name: '',
+    email: '',
     phone: '',
     message: '',
   });
@@ -97,4 +96,4 @@ function contactForm()
   }
 }
 
-export default contactForm;
+export default ContactForm;

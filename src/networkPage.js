@@ -23,7 +23,6 @@ function Solar() {
         <MDBCardTitle>IT Služby</MDBCardTitle>
         <MDBRow>
           <MDBCol md={8}>
-            <MDBCardText>
               <MDBRow className="mb-4">
                 <MDBCol>
                   <MDBTypography listUnStyled className="mb-0">
@@ -50,7 +49,6 @@ function Solar() {
                   </MDBTypography>
                 </MDBCol>
               </MDBRow>
-            </MDBCardText>
           </MDBCol>
           <MDBCol md={4}>
             <ContactForm />
