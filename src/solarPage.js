@@ -18,16 +18,14 @@ function Solar() {
         <MDBCardTitle>Solární elektárny</MDBCardTitle>
         <MDBRow>
           <MDBCol md={8}>
-            <MDBCardText>
-              <MDBRow className='mb-4'>
-                <MDBCol>
-                  Pro Váš rodinný dům nabízíme různorodé fotovoltaické střešní systémy jako jsou solární taška, solární panel nebo solární fásáda. K fotovoltaické elektrárně dokážeme nakombinovat další technologie jako je tepelné čerpadlo, bateriové uložiště nebo dobíjecí stanice pro elektromobily.<br/><br/>
-                </MDBCol>
-                <MDBCol>
-                  Vybrané technologie navrhujeme vždy na míru na základě prvotní analýzy proveditelnosti daného objektu.
-                </MDBCol>
+            <MDBRow className='mb-4'>
+              <MDBCol>
+                Pro Váš rodinný dům nabízíme různorodé fotovoltaické střešní systémy jako jsou solární taška, solární panel nebo solární fásáda. K fotovoltaické elektrárně dokážeme nakombinovat další technologie jako je tepelné čerpadlo, bateriové uložiště nebo dobíjecí stanice pro elektromobily.<br/><br/>
+              </MDBCol>
+              <MDBCol>
+                Vybrané technologie navrhujeme vždy na míru na základě prvotní analýzy proveditelnosti daného objektu.
+              </MDBCol>
               </MDBRow>
-            </MDBCardText>
           </MDBCol>
           <MDBCol md={4}>
             <ContactForm />
