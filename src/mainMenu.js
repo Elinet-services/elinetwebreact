@@ -25,10 +25,22 @@ function MainMenu() {
 
   return (
     <>
-      <MDBNavbar expand="lg" bgColor="#DADADA" className="mb-3" sticky light>
+      <MDBNavbar
+        fixed="bottom"
+        expand="lg"
+        bgColor="white"
+        className="mb-2"
+        sticky
+        light
+      >
         <MDBContainer fluid>
           <MDBNavbarBrand about="ELINET services" href="/">
-            <img src="images/elinetLogoI.png" />
+            <img
+              src="images/elinetLogoI.png"
+              height="30"
+              alt="Logo"
+              loading="lazy"
+            />
           </MDBNavbarBrand>
           <MDBNavbarToggler
             onClick={() => setShowBasic(!showBasic)}
@@ -39,10 +51,18 @@ function MainMenu() {
             <MDBIcon fas icon="bars" />
           </MDBNavbarToggler>
           <MDBCollapse show={showBasic} navbar>
-            <MDBNavbarNav left className="mb-2 mb-lg-0">
+            <MDBNavbarNav className="my-2 mb-lg-0">
               <MDBNavbarItem>
                 <MDBNavbarLink
                   href="./solar"
+                  className={getActiveMenu("network")}
+                >
+                  IT řešení
+                </MDBNavbarLink>
+              </MDBNavbarItem>
+              <MDBNavbarItem>
+                <MDBNavbarLink
+                  href="./security"
                   className={getActiveMenu("solar")}
                 >
                   Solární elektárny
@@ -51,17 +71,9 @@ function MainMenu() {
               <MDBNavbarItem>
                 <MDBNavbarLink
                   href="./network"
-                  className={getActiveMenu("network")}
-                >
-                  Síťová řešení
-                </MDBNavbarLink>
-              </MDBNavbarItem>
-              <MDBNavbarItem>
-                <MDBNavbarLink
-                  href="./security"
                   className={getActiveMenu("security")}
                 >
-                  Zabezpečení
+                  Zabezpečení objektů
                 </MDBNavbarLink>
               </MDBNavbarItem>
               <MDBNavbarItem>
@@ -101,9 +113,8 @@ export function mainFooter(params) {
                 Elinet services s.r.o.
               </h6>
               <p>
-                Here you can use rows and columns to organize your footer
-                content. Lorem ipsum dolor sit amet, consectetur adipisicing
-                elit.
+                Partner pro IT malých a středních společností, dodavatel
+                solárních elektráren a zabezpečnení objektů
               </p>
             </MDBCol>
 
@@ -179,8 +190,8 @@ export function mainFooter(params) {
         </MDBContainer>
       </section>
       <div
-        className="text-center p-4"
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.05)" }}
+        className="text-center p-1"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.02)" }}
       >
         © 2022 Copyright:{" "}
         <a className="text-reset fw-bold" href="https://elinet.cz/">
