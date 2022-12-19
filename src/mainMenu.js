@@ -19,17 +19,17 @@ function MainMenu() {
   const [showBasic, setShowBasic] = useState(false)
 
   function getActiveMenu(aMenuItem) {
-    if (window.location.pathname == "/" + aMenuItem) return "active px-3"
+    if (window.location.pathname === "/" + aMenuItem) return "active px-3"
     else return "px-3"
   }
 
   return (
     <>
       <MDBNavbar
-        fixed="bottom"
+        fixed="botom"
         expand="lg"
         bgColor="white"
-        className="mb-2"
+        className="mb-1"
         sticky
         light
       >
@@ -54,7 +54,7 @@ function MainMenu() {
             <MDBNavbarNav className="my-2 mb-lg-0">
               <MDBNavbarItem>
                 <MDBNavbarLink
-                  href="./solar"
+                  href="./network"
                   className={getActiveMenu("network")}
                 >
                   IT řešení
@@ -62,18 +62,18 @@ function MainMenu() {
               </MDBNavbarItem>
               <MDBNavbarItem>
                 <MDBNavbarLink
-                  href="./security"
+                  href="./solar"
                   className={getActiveMenu("solar")}
                 >
-                  Solární elektárny
+                  Fotovoltaika
                 </MDBNavbarLink>
               </MDBNavbarItem>
               <MDBNavbarItem>
                 <MDBNavbarLink
-                  href="./network"
+                  href="./security"
                   className={getActiveMenu("security")}
                 >
-                  Zabezpečení objektů
+                  Zabezpečení
                 </MDBNavbarLink>
               </MDBNavbarItem>
               <MDBNavbarItem>

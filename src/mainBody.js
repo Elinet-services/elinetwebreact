@@ -38,7 +38,7 @@ function mainPage() {
             <MDBCardImage
               src="https://mdbootstrap.com/img/Photos/Slides/img%20(16).jpg"
               position="top"
-              alt="Síťová řešení"
+              alt="IT řešení"
             />
             <MDBCardBody>
               <MDBCardTitle>Síťová řešení</MDBCardTitle>
