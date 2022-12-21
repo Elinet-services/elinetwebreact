@@ -2,7 +2,6 @@ import {
   MDBCard,
   MDBCardBody,
   MDBCardTitle,
-  MDBCardText,
   MDBCardImage,
   MDBRow,
   MDBCol,

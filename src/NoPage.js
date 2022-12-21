@@ -3,7 +3,6 @@ import {
   MDBCardBody,
   MDBCardTitle,
   MDBCardText,
-  MDBCardImage,
   MDBRow,
   MDBCol
 } from 'mdb-react-ui-kit'; 

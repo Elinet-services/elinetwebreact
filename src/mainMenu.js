@@ -173,13 +173,13 @@ export function mainFooter(params) {
                 <MDBCol md={2}>
                   <MDBIcon icon="envelope" className="me-3" />
                 </MDBCol>
-                <MDBCol md={10}>info@elinet.com</MDBCol>
+                <MDBCol md={10}><a href='mailto:info@elinet.com'>info@elinet.com</a></MDBCol>
               </MDBRow>
               <MDBRow className="mb-2">
                 <MDBCol md={2}>
                   <MDBIcon icon="phone" className="me-3" />
                 </MDBCol>
-                <MDBCol md={10}>+ 420 776 684 729</MDBCol>
+                <MDBCol md={10}><a href='tel:+420776684729'>+ 420 776 684 729</a></MDBCol>
               </MDBRow>
               <MDBRow>
                 <MDBCol md={2}>IČO:</MDBCol>

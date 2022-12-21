@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { MDBCol, MDBInput, MDBTextArea, MDBBtn } from "mdb-react-ui-kit"
+import { sha256 } from "node-forge";
 
 function ContactForm() {
   const [submited, setSubmited] = useState(false)
@@ -10,57 +11,86 @@ function ContactForm() {
     email: "",
     phone: "",
     message: "",
+    password: ""
   })
 
   const onChange = (e) => {
     setFormValue({ ...formValue, [e.target.name]: e.target.value })
+    if (e.target.name === 'password') {
+      if (e.target.value.length === 0)
+        e.target.setCustomValidity('');
+      else if (e.target.value.length < 8)
+        e.target.setCustomValidity('Heslo musí mít délku alespoň 8 znaků');
+      else
+        e.target.setCustomValidity('');
+    }
   }
 
-  function Submit(e) {
-    e.preventDefault()
-    const formData = new FormData(document.querySelector("form"))
-    formData.append("dateTime", new Date().toUTCString())
-    formData.append("source", window.location.pathname.substring(1))
-    /* for (const pair of formData.entries()) {
-      console.log(pair[0] +', '+ pair[1]);
-    } */
-    //formData.append('ipAddress', ...)
-    setSubmited(true) //  nastavime odeslano
+  function checkForm() 
+  {
+    let v_ret = true;
+    if (formValue.password.length < 8) {
+      v_ret = false;
+    }
 
-    const url =
-      "https://script.google.com/macros/s/AKfycbyR22C2uc7oNgSYgjWu7vxTSyKyAipY3EpboV-xGTdR1YhqLkSo0fVq7_l9LqzX-lU_DQ/exec"
-    //const url = 'https://httpstat.us/401';
-    //const url = 'https://script.google.com/macros/s/AKfycbz3xsrZgWErwE8RcO0iOb9rCgthBDDBejk3EZTfts-2HUDiKXSIHGTaBUcbSYlNmrktpw/exec';
+    return v_ret;
+  }
 
-    fetch(url, {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        /* if (response.status === 401) {
-          navigate('/login');
-        } */
+  function Submit(e)
+  {
+    e.preventDefault();
 
-        console.log(response)
-        if (!response.ok) {
+    const formData = new FormData(document.getElementById("contactForm"));
+
+    if (checkForm()) {
+
+      const sha = sha256.create().update(formData.get("password"));
+
+      formData.set("password", sha.digest().toHex());
+      formData.append("dateTime", new Date().toUTCString())
+      formData.append("source", window.location.pathname.substring(1))
+
+      /* for (const pair of formData.entries()) {
+        console.log(pair[0] +', '+ pair[1]);
+      } */
+      //formData.append('ipAddress', ...)
+      setSubmited(true) //  nastavime odeslano
+
+      const url = "https://script.google.com/macros/s/AKfycbyR22C2uc7oNgSYgjWu7vxTSyKyAipY3EpboV-xGTdR1YhqLkSo0fVq7_l9LqzX-lU_DQ/exec"
+      //const url = 'https://httpstat.us/401';
+      //const url = 'https://script.google.com/macros/s/AKfycbz3xsrZgWErwE8RcO0iOb9rCgthBDDBejk3EZTfts-2HUDiKXSIHGTaBUcbSYlNmrktpw/exec';
+
+      fetch(url, {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => {
+          /* if (response.status === 401) {
+            navigate('/login');
+          } */
+
+          console.log(response)
+          if (!response.ok) {
+            setError(true)
+            return { result: "Nepodarilo se odeslat" }
+          } else {
+            setFormValue({ name: "", email: "", phone: "", message: "", password: "" })
+            document.getElementById('contactForm').reset();
+            return response.json()
+          }
+        })
+        .then((responseData) => {
+          console.log(responseData.result)
+          setResponseMessage(responseData.result)
+        })
+        .catch((e) => {
+          console.log(e.message)
           setError(true)
-          return { result: "Nepodarilo se odeslat" }
-        } else {
-          setFormValue({ name: "", email: "", phone: "", message: "" })
-          return response.json()
-        }
-      })
-      .then((responseData) => {
-        console.log(responseData.result)
-        setResponseMessage(responseData.result)
-      })
-      .catch((e) => {
-        console.log(e.message)
-        setError(true)
-        setResponseMessage("Kriticka chyba")
-      })
+          setResponseMessage("Kriticka chyba")
+        })
+    }
   }
-
+  
   if (error) {
     return (
       <p>
@@ -79,7 +109,7 @@ function ContactForm() {
     )
   } else {
     return (
-      <form onSubmit={(e) => Submit(e)}>
+      <form onSubmit={(e) => Submit(e)} id="contactForm">
         <MDBCol className="formHead mb-3">
           Rádi poskytneme bližší informace:{" "}
         </MDBCol>
@@ -90,6 +120,7 @@ function ContactForm() {
           value={formValue.name}
           wrapperClass="mb-4"
           label="Jméno a příjmení"
+          required
         />
         <MDBInput
           name="email"
@@ -99,12 +130,14 @@ function ContactForm() {
           type="email"
           wrapperClass="mb-4"
           label="Email"
+          required
         />
         <MDBInput
           name="phone"
           id="phone"
           onChange={onChange}
           value={formValue.phone}
+          type='tel'
           wrapperClass="mb-4"
           label="Telefon"
         />
@@ -117,6 +150,16 @@ function ContactForm() {
           wrapperClass="mb-4"
           label="Text zprávy"
         />
+        <MDBInput
+          name="password"
+          id="password"
+          onChange={onChange}
+          value={formValue.password}
+          type="password"
+          wrapperClass="mb-4"
+          label="Heslo (min 8 znaků)"
+          required
+        />
 
         <MDBBtn type="submit" className="mb-4" block>
           Odeslat
@@ -126,4 +169,4 @@ function ContactForm() {
   }
 }
 
-export default ContactForm
+export default ContactForm;
