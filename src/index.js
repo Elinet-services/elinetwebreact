@@ -11,6 +11,14 @@ import MainPage from "./mainPage"
 import SolarPage from "./solarPage"
 import SecurityPage from "./securityPage"
 import NetworkPage from "./networkPage"
+
+import RegisterPage from "./clientRegister"
+import RegisterPageDone from "./clientRegisterDone"
+
+import Login from "./clientLogin"
+import Forgot from "./clientForgot"
+import ResetPassword from "./clientReset"
+
 import NoPage from "./NoPage"
 
 export default function RoutePage() {
@@ -25,6 +33,15 @@ export default function RoutePage() {
             <Route path="network" element={<NetworkPage />} />
             <Route path="about" element={<NoPage />} />
             <Route path="contacts" element={<NoPage />} />
+
+
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="registerDone" element={<RegisterPageDone />} />
+            
+            <Route path="login" element={<Login />} />
+            <Route path="forgot" element={<Forgot />} />
+
+            <Route path="reset/:token" element={<ResetPassword />} />
             <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>

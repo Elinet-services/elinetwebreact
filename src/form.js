@@ -56,7 +56,7 @@ function ContactForm() {
       //formData.append('ipAddress', ...)
       setSubmited(true) //  nastavime odeslano
 
-      const url = "https://script.google.com/macros/s/AKfycbyR22C2uc7oNgSYgjWu7vxTSyKyAipY3EpboV-xGTdR1YhqLkSo0fVq7_l9LqzX-lU_DQ/exec"
+      const url = "https://script.google.com/macros/s/AKfycbyHpBxU8hmMBau8A_l7sOCEaMaE7VszFDeIXYE-03n83r-q_FAREIZSEeNmstK5nL-vTw/exec";
       //const url = 'https://httpstat.us/401';
       //const url = 'https://script.google.com/macros/s/AKfycbz3xsrZgWErwE8RcO0iOb9rCgthBDDBejk3EZTfts-2HUDiKXSIHGTaBUcbSYlNmrktpw/exec';
 

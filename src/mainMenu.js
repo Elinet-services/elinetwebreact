@@ -36,7 +36,7 @@ function MainMenu() {
         <MDBContainer fluid>
           <MDBNavbarBrand about="ELINET services" href="/">
             <img
-              src="images/elinetLogoI.png"
+              src="/images/elinetLogoI.png"
               height="30"
               alt="Logo"
               loading="lazy"
@@ -54,7 +54,7 @@ function MainMenu() {
             <MDBNavbarNav className="my-2 mb-lg-0">
               <MDBNavbarItem>
                 <MDBNavbarLink
-                  href="./network"
+                  href="/network"
                   className={getActiveMenu("network")}
                 >
                   IT řešení
@@ -62,7 +62,7 @@ function MainMenu() {
               </MDBNavbarItem>
               <MDBNavbarItem>
                 <MDBNavbarLink
-                  href="./solar"
+                  href="/solar"
                   className={getActiveMenu("solar")}
                 >
                   Fotovoltaika
@@ -70,20 +70,25 @@ function MainMenu() {
               </MDBNavbarItem>
               <MDBNavbarItem>
                 <MDBNavbarLink
-                  href="./security"
+                  href="/security"
                   className={getActiveMenu("security")}
                 >
                   Zabezpečení
                 </MDBNavbarLink>
               </MDBNavbarItem>
               <MDBNavbarItem>
-                <MDBNavbarLink href="./about" className="px-3">
+                <MDBNavbarLink href="/about" className="px-3">
                   O nás
                 </MDBNavbarLink>
               </MDBNavbarItem>
               <MDBNavbarItem>
-                <MDBNavbarLink href="./contact" className="px-3">
+                <MDBNavbarLink href="/contact" className="px-3">
                   Kontakt
+                </MDBNavbarLink>
+              </MDBNavbarItem>
+              <MDBNavbarItem>
+                <MDBNavbarLink href="/login" className="px-3">
+                  Přihlášení
                 </MDBNavbarLink>
               </MDBNavbarItem>
             </MDBNavbarNav>
