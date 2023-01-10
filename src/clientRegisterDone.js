@@ -5,9 +5,9 @@ function ClientRegisterDone() {
     <section className="d-flex justify-content-center">
         <MDBCard>
             <MDBCardBody>
-                <MDBCardText>Registrace provedena</MDBCardText>
+                <MDBCardText>Registrace aktivována</MDBCardText>
+                <a href="/login">Přihlaste se prosím</a>
             </MDBCardBody>
-            <a href="/login">Přihlašte se prosím</a>
         </MDBCard>
     </section>
     )

@@ -77,11 +77,13 @@ function ClientLogin() {
         )
     } else if (submited) {
         return (
-          <p>
-            <br />
-            {responseMessage}
-            <br />
-          </p>
+          <section className="d-flex justify-content-center">
+            <MDBCard>
+                <MDBCardBody>
+                    <MDBCardText>{responseMessage}</MDBCardText>
+                </MDBCardBody>
+            </MDBCard>
+          </section>
         )
     } else 
     return (

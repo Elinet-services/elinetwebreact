@@ -93,13 +93,14 @@ function ClientReset() {
         )
     } else if (submited) {
         return (
-          <p>
-            <br />
-            {responseMessage}
-            <br />
-            <a href="/login">Přihlaste se</a>
-
-          </p>
+          <section className="d-flex justify-content-center">
+            <MDBCard>
+                <MDBCardBody>
+                    <MDBCardText>{responseMessage}</MDBCardText>
+                </MDBCardBody>
+                <a href="/login">Přihlaste se prosím</a>
+            </MDBCard>
+          </section>
         )
     } else 
     return (
