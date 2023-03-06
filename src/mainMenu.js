@@ -91,6 +91,11 @@ function MainMenu() {
                   Přihlášení
                 </MDBNavbarLink>
               </MDBNavbarItem>
+              <MDBNavbarItem>
+                <MDBNavbarLink href="/administrace" className="px-3">
+                  Administrace
+                </MDBNavbarLink>
+              </MDBNavbarItem>
             </MDBNavbarNav>
           </MDBCollapse>
         </MDBContainer>

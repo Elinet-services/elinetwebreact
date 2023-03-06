@@ -43,7 +43,7 @@ function mainPage() {
             <MDBCardBody>
               <MDBCardTitle>Síťová řešení</MDBCardTitle>
               <MDBCardText>
-                Zajišťujeme chod malých a středních společností bezproblémovýcm
+                Zajišťujeme chod malých a středních společností bezproblémovým
                 chodem firemního IT. Implementujeme kompletní síťové služby
                 především na bázi kompoment Mikrotik a Cisco. Z pohledu
                 základních aplikačních životních funkcí jako jsou mailová

@@ -18,6 +18,7 @@ import RegisterPageDone from "./clientRegisterDone"
 import Login from "./clientLogin"
 import Forgot from "./clientForgot"
 import ResetPassword from "./clientReset"
+import Administrace from "./administrace"
 
 import NoPage from "./NoPage"
 
@@ -40,6 +41,7 @@ export default function RoutePage() {
             
             <Route path="login" element={<Login />} />
             <Route path="forgot" element={<Forgot />} />
+            <Route path="administrace" element={<Administrace />} />
 
             <Route path="reset/:token" element={<ResetPassword />} />
             <Route path="*" element={<NoPage />} />
