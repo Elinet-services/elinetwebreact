@@ -1,188 +1,458 @@
 import { useState } from "react";
 
 import {
-  MDBCard, MDBCardBody, MDBContainer,
+  MDBCard, MDBCardBody, MDBCardTitle, MDBContainer,
+  MDBInput, MDBSelect, MDBDatepicker, MDBTextArea,
   MDBDatatable,
   MDBIcon,
   MDBRow,
   MDBCol  
 } from 'mdb-react-ui-kit';
-import { MDBTreeview } from 'mdb-react-treeview';
+import {
+  MDBBtn,
+  MDBModal,
+  MDBModalDialog,
+  MDBModalContent,
+  MDBModalHeader,
+  MDBModalTitle,
+  MDBModalBody,
+  MDBModalFooter,
+} from 'mdb-react-ui-kit';
+
+import {
+  MDBPopconfirm,
+  MDBPopconfirmMessage,
+} from 'mdb-react-ui-kit';
+
 import { MDBTreeTable, MDBTreeTableItem, MDBTreeTableHead, MDBTreeTableBody } from 'mdb-react-treetable';
 import "mdb-react-treetable/dist/css/treetable.min.css"
 
 
 function Administrace()
 {
+  const documentTypeList = {
+    'FP' : {text: 'Faktura přijatá'},
+    'FV' : {text: 'Faktura vydaná'},
+    'Z'  : {text: 'Záruční list'}
+  };
+
   const httpResponse = {
     sourceData: [
       { partnerName:'Petr Macasek', identification:{idPartner: 111},
-        orders:[
-            { idOrder:111, orderName:'Ostrovni system', address: 'Drzkova 755', description: 'Strucny popis zakazky', closed: false,
-              documents: [
-                {idDocument: 10001, company: 'Alza a.s', documentName: 'Faktura prijata', documentDate: '12.7.2022'},
-                {idDocument: 10011, company: 'Elinet s.r.o', documentName: 'Zarucni list', documentDate: '7.11.2022'},
-              ]
+        orders:{
+            111: { 
+              idOrder:111, orderName:'Ostrovni system', description: 'Strucny popis zakazky', dateFrom: '11.2.2022', dateTo: '22.4.2022', closed: false,
+              documents: {
+                10001: {documentName: 'Plast partner spol. s r.o.', documentType: 'FP', description: 'popis dokumentu', documentDate: '2022-07-12',
+                        fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'},                        
+                10011: {documentName: 'Uctujeme za zbozi', documentType: 'FV',description: 'Zarucak specialni', documentDate: '2022-11-07',
+                        fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'},
+                },
             },
-            { idOrder:112, orderName:'Zabezpeceni', address: 'Straseci 5', description: 'Strucny popis zakazky', closed: false,
-              documents: [
-                {idDocument: 10011, company: 'Alza a.sasdasda', documentName: 'Faktura prijata', documentDate: '12.7.2022'},
-                {idDocument: 10021, company: 'Elinet s.r.o', documentName: 'Zarucni list', documentDate: '7.11.2022'},
-              ]
-            }          
-        ]
+            222: { 
+              idOrder:112, orderName:'Zabezpeceni', description: 'Zakazka 111.2 popisek', dateFrom: '1.6.2022', dateTo: '7.8.2022', closed: true,
+              documents: {
+                10012: {documentName: 'Conrad Electronic', documentType: 'FP', description: 'Strucny popis dokumentu', documentDate: '2022-08-03',
+                        fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'},                
+                10013: {documentName: 'Zaruka na zabezpečení', documentType: 'Z', description: 'dokumentik popisek', documentDate: '2022-11-20',
+                        fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'}
+              }
+            }
+          }
       },
       { partnerName:'Roman Kubrt', identification:{idPartner: 211},
-        orders:[
-          { idOrder:112, orderName:'Aaxdasdsad', address: 'Straseci 5', description: 'Strucny popis zakazky', closed: false,
-          documents: [
-            {idDocument: 10011, company: 'Alza a.sasdasda', documentName: 'Faktura prijata', documentDate: '12.7.2022'},
-            {idDocument: 10021, company: 'Elinet s.r.o', documentName: 'Zarucni list', documentDate: '7.11.2022'},
-          ]
-        }          
-
-        ]
+        orders:{
+          113: { 
+            idOrder:113, orderName:'Vyhledavaci system', description: 'Zakazka uplne normalni', dateFrom: '11.8.2022', dateTo: '2.10.2023', closed: true,
+            documents: {
+              10023: {documentName: 'Ostrovní elektrárny s.r.o.', documentType: 'FV', description: 'Dokument s nejakym hrozne dlouhym textickem ktery se nevejde do policka', documentDate: '2022-06-15',
+                      fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'},
+              10024: {documentName: 'Zaruka na vyhledani psa', documentType: 'Z', description: 'Strucny popis dokumentu', documentDate: '2022-10-13',
+                      fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'},
+            }
+          }
+        }
       },
       { partnerName:'Zdenek Ulrich', identification:{idPartner: 311},
-        orders:[]
+        orders:{}
       },
-      {partnerName:'Petr Macasek 1.5', identification:{idPartner: 411}},
-      {partnerName:'Petr Macasek 2', identification:{idPartner: 511}},
+      {partnerName:'Petr Macasek 1.5', identification:{idPartner: 411},
+        orders:{}
+      },
+      {partnerName:'Petr Macasek 2', identification:{idPartner: 511},
+        orders:{}
+      },
       {partnerName:'Roman Kubrt 2', identification:{idPartner: 611}},
       {partnerName:'Zdenek Ulrich 2', identification:{idPartner: 711}},
       {partnerName:'Roman Kubrt 3', identification:{idPartner: 811}},
       {partnerName:'Zdenek Ulrich 3', identification:{idPartner: 911}},
-      { partnerName:'Petr Macasek 2', identification:{idPartner: 1111}}      
+      { partnerName:'Petr Macasek 2', identification:{idPartner: 1111}}
     ]
   };
 
-  const [orders, setOrders] = useState(httpResponse.sourceData[0].orders);
-  orders.forEach(order => {
-    console.log(order.orderName)
-  });
+  const [activePartner, setActivePartner] = useState(null); //  httpResponse.sourceData[0]
+  const [activeOrder, setActiveOrder] = useState(null);
+  const [activeDocument, setActiveDocument] = useState(null);
+  //
+  const [showDocumentDetail, setShowDocumentDetail] = useState(false);
+  const [showDocumentList,   setShowDocumentList]   = useState(false);
+  const [detailFromList,     setDetailFromList]     = useState(false); //  detail dokumentu zobrazen z Prehledu
+  //
+  const [documentFormValue, setDocumentFormValue] = useState({
+    documentType: "",
+    documentName: "",
+    description: "",
+    documentDate: ""
+  })
 
+  function formatDate(aDate) 
+  {
+    let dateString = ''
+    const firstDot = aDate.indexOf('-');
+    const lastDot  = aDate.lastIndexOf('-');
+    //  kontrola
+    if (firstDot > 0 && lastDot > firstDot )
+      dateString = parseInt(aDate.substring(lastDot + 1)) +'.'+ parseInt(aDate.substring(firstDot + 1, lastDot)) +'.'+ aDate.substring(0, firstDot);
+    return dateString;
+  }
+  const toggleShowDocumentDetail = () => setShowDocumentDetail(!showDocumentDetail);
+  const toggleShowDocumentList = () => setShowDocumentList(!showDocumentList);
+  
   let partners = {
     columns:  [
-                {label:'Klient', field:'partnerName'}                
+                {label:'Klient', field:'partnerName'}
               ], 
     rows: httpResponse.sourceData
   };
 
-
-  let ordersObj = {
-    columns: [{label:'Zakazka', field:'orderName'},
-              {label:'Doklad', field:'documentName'} ],
+  let documents = {
+    columns:  [
+                {label:'Soubor', field:'displayName'}
+              ], 
     rows: [
-      {idOrder:111, orderName:'Stavba elektrarny', depth:1 },
-      {idDocument:111,depth: 2, documentName:<MDBRow><MDBCol>Alza a.s.</MDBCol><MDBCol>Faktura</MDBCol></MDBRow>},
-      {idDocument:112, depth: 2, documentName:'Zarucni list'},
-      {idOrder:222, orderName:'Zabezpeceni domu'},
-      {idDocument:211, documentName:'Faktura Securitas'},
-      {idDocument:212, documentName:'Zarucni list'}
+      { displayName:'9707757846.pdf', parameters:{documentName: '9707757846', documentType: '', description: 'popisek', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z' }},
+      { displayName:'AppSheet Invoice 20201219.pdf', parameters:{documentName: 'AppSheet Invoice 20201219', documentType: '', description: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'} },
+      { displayName:'INV05501595.pdf', parameters:{documentName: '3', documentType: '', description: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'} },  
+      { displayName:'100220406.pdf', parameters:{documentName: '4', documentType: '', description: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'} },
+      { displayName:'AXL 20220102_POV1220002.pdf', parameters:{documentName: '5', documentType: '', description: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'} },
+      { displayName:'Zálohová_faktura_2260400136.pdf', parameters:{documentName: '', documentType: '', description: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'} },
+      { displayName:'Elnika 20211027.pdf', parameters:{documentName: '', documentType: '', description: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'} },
+      { displayName:'Uber 20220104.pdf', parameters:{documentName: '', documentType: '', description: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'} },
+      { displayName:'Alza 20210219_2211903041.pdf', parameters:{documentName: '', documentType: '', description: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'} },
+      { displayName:'Alza 20210403_2213538727.pdf', parameters:{documentName: '', documentType: '', description: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'} },
+      { displayName:'Liftago 20211117_1463.pdf', parameters:{documentName: '', documentType: '', description: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'} },
     ]
   };
+  
+  
+  function onClickDocumentDelete(idDocument)
+  {    
+    // console.log( idDocument + ' - '+ activeOrder); // activePartner.orders[activeOrder].orderName 
+    
+  }
 
+  /* PREHLED ZAKAZEK a DOKUMENTU */
   function createOrderTreeTable()
   {
-    let retArr = new Array();
-    if (orders != 'undefined') {
-      orders.forEach(order => {
-        retArr.push(<MDBTreeTableItem values={[<MDBRow><MDBCol>{order.orderName}</MDBCol><MDBCol>{order.address}</MDBCol></MDBRow>]} depth={1} className='table-secondary'/>)
-        order.documents.forEach(document => {
-          retArr.push(<MDBTreeTableItem values={[<MDBRow><MDBCol>{document.company}</MDBCol><MDBCol>{document.documentName}</MDBCol><MDBCol>{document.documentDate}</MDBCol></MDBRow>]} depth={2} />)
+    let retArr = new Array([]);
+    if (activePartner !== null && activePartner.orders !== undefined) {
+      Object.keys(activePartner.orders).forEach(idOrder => {
+        const order = activePartner.orders[idOrder];
+        retArr.push(<MDBTreeTableItem key={'idOrder'+ idOrder}
+                                      depth={1}
+                                      values={[ <MDBRow>
+                                                  <MDBCol md='3'>{order.orderName}</MDBCol>
+                                                  <MDBCol md='2' className="d-flex justify-content-end">{order.dateFrom}</MDBCol>
+                                                  <MDBCol md='2' className="d-flex justify-content-end">{order.dateTo}</MDBCol>
+                                                  <MDBCol md='4' className="overflow-hidden text-nowrap">{order.description}</MDBCol>
+                                                  <MDBCol md='1' className="d-flex justify-content-end">
+                                                    {(order.closed ? '':
+                                                      <MDBIcon far icon='plus-square'
+                                                        onClick={ () => {
+                                                          setActiveOrder(order);
+                                                          setShowDocumentList(!showDocumentList);
+                                                        }
+                                                      }            
+                                                      />
+                                                    )}
+                                                  </MDBCol>
+                                                </MDBRow>]}
+                                      className={(order.closed?'table-secondary':'')}/>)
+
+        Object.keys(order.documents).forEach(idDocument => {
+          const document = order.documents[idDocument];
+          retArr.push(<MDBTreeTableItem key={'idDocument'+ idDocument} 
+                                        depth={2} 
+                                        onClick={ () => {
+                                            setActiveOrder(order);
+                                            setActiveDocument(document);
+                                            setDetailFromList(false);
+                                            setShowDocumentDetail(!showDocumentDetail);
+                                          }
+                                        }
+                                        values={[ <MDBRow>
+                                                    <MDBCol md='3'>{document.documentName}</MDBCol>
+                                                    <MDBCol md='2'>{documentTypeList[document.documentType].text}</MDBCol>
+                                                    <MDBCol md='2' className="d-flex justify-content-end">{formatDate(document.documentDate)}</MDBCol>
+                                                    <MDBCol md='5' className="overflow-hidden text-nowrap">{document.description}</MDBCol>
+                                                    { /*
+                                                      <MDBCol md='1' className="d-flex justify-content-end">
+                                                      {(order.closed ? '': 
+                                                        <MDBIcon far icon='trash-alt'
+                                                          onClick={onClickDocumentDelete(idDocument)}
+                                                        /> 
+                                                      )}
+                                                    </MDBCol> */}
+                                                  </MDBRow>]}
+                                        className={(order.closed?'table-secondary':'')}/>)
         })
       });
     }
     return retArr;
   }
-  
-
-//fixedHeader
-    return (
-
-      <>
-      <MDBContainer className="py-5">
-        <MDBCard>
-          <MDBCardBody>
-            <MDBRow>
-              <MDBCol md='3'>
-                <MDBDatatable maxHeight='400px' maxWidth='300px' 
-                  pagination={false}
-                  hover
-                  entries={9999}
-                  bordered            
-                  allText='Vše'
-                  ofText='z'
-                  rowsText='Řádek'
-                  fixedHeader search sm
-                  onRowClick={(row) => {               
-                    setOrders(row.orders);
-                    }
-                  }
-                  data={partners} />
-              </MDBCol>            
-              <MDBCol md='9'>
-                <MDBTreeTable>                
-                  <MDBTreeTableHead heads={[<MDBRow><MDBCol>Zakazka</MDBCol><MDBCol>Adresa</MDBCol></MDBRow>]} />
-                  <MDBTreeTableBody>
-                    {createOrderTreeTable()}
-
-                  </MDBTreeTableBody>                
-                </MDBTreeTable>
-
-                </MDBCol>
-            </MDBRow>
-          </MDBCardBody>
-        </MDBCard>
-      </MDBContainer>
-      </>
+  function getDocumentTypeSelectData(activeDocumentType)
+  {
+    let retArr = new Array([]);
+    Object.keys(documentTypeList).forEach(documentType => 
+      {
+        retArr.push({text: documentTypeList[documentType].text, value: documentType, defaultSelected: activeDocumentType === documentType });
+      }
     )
+    return retArr;
+  }
+
+  const onChange = (e) => {
+    setDocumentFormValue({ ...documentFormValue, [e.target.name]: e.target.value })
+    if (e.target.name === 'documentDate') {
+      activeDocument.documentDate = e.target.value;      
+    }
+  }
+  return (
+    <>
+    <MDBContainer className="py-5">
+      <MDBRow>
+        <MDBCol md='3'>
+          <MDBCard>
+            <MDBCardBody>
+              <MDBDatatable maxHeight='400px' maxWidth='300px' 
+                pagination={false}
+                hover
+                entries={9999}
+                bordered            
+                allText='Vše'
+                ofText='z'
+                rowsText='Řádek'
+                fixedHeader search striped sm
+                onRowClick={(row) => {               
+                    setActivePartner(row);
+                    setActiveOrder(null);
+                    setActiveDocument(null);
+                  }
+                }
+                data={partners} />
+            </MDBCardBody>
+          </MDBCard>
+        </MDBCol>              
+        <MDBCol md='9'>
+          <MDBCard>
+            <MDBCardBody>
+              <MDBCardTitle>{activePartner == undefined ? '' : activePartner.partnerName }</MDBCardTitle>
+              <MDBTreeTable className="treetable-sm">
+                <MDBTreeTableHead heads={[<MDBRow>
+                                            <MDBCol md='3'>Zakázka</MDBCol>
+                                            <MDBCol md='2' className="d-flex justify-content-end">Datum od</MDBCol>
+                                            <MDBCol md='2' className="d-flex justify-content-end">Datum do</MDBCol>
+                                            <MDBCol md='4'>Popis</MDBCol>
+                                            <MDBCol md='1' className="d-flex justify-content-end">
+                                              <MDBIcon far icon='plus-square'                                                          
+                                                        />
+                                            </MDBCol>
+                                          </MDBRow>]} />
+                <MDBTreeTableBody>
+                  {createOrderTreeTable()}
+                </MDBTreeTableBody>
+              </MDBTreeTable>
+
+            </MDBCardBody>
+          </MDBCard>
+        </MDBCol>
+      </MDBRow>
+    </MDBContainer>
+
+
+    {/* DOCUMENT LIST */}
+
+    <MDBModal tabIndex='-1' show={showDocumentList} setShow={setShowDocumentList}>
+    {activePartner == undefined || activeOrder === null ? '' :
+      <MDBModalDialog size="xl">
+        <MDBModalContent>
+          <MDBModalHeader>
+            <MDBModalTitle>{activePartner.partnerName}<br></br>{activeOrder.orderName}</MDBModalTitle>
+            <MDBBtn
+              type='button'
+              className='btn-close'
+              color='none'
+              onClick={toggleShowDocumentList}
+            ></MDBBtn>
+          </MDBModalHeader>
+          <MDBModalBody>
+            <MDBRow>
+              {/* 1. sloupec s daty */}
+              <MDBCol md='3'>
+              <MDBDatatable maxHeight='400px' maxWidth='300px' 
+                pagination={false}
+                hover
+                entries={9999}
+                bordered            
+                allText='Vše'
+                ofText='z'
+                rowsText='Řádek'
+                fixedHeader search striped sm
+                onRowClick={(row) => {
+                    setActiveDocument(row.parameters);
+                  }
+                }
+                data={documents} />
+              </MDBCol>
+
+              {/* 2. sloupec s nahledem */}
+              <MDBCol>
+                <MDBRow>
+                  <MDBCol>
+                    <MDBDatatable
+                      pagination={false}
+                      entries={9999}
+                      fixedHeader sm
+                      noFoundMessage = ''
+                      data = {{
+                          columns:  [
+                            {label:'Název dokumentu', field:'documentName', width: 200},
+                            {label:'Datum', field:'documentDate', width: 200},
+                            {label:'Popis', field:'description'}
+                          ], 
+                          rows: activeDocument == null ? [] :
+                                [{documentName: activeDocument.documentName, documentDate: formatDate(activeDocument.documentDate), description: activeDocument.description}]
+                        }
+                      }
+                    />
+                  </MDBCol>
+                </MDBRow>
+                <MDBRow>
+                  <MDBCol>Nahled dokumentu</MDBCol>
+                </MDBRow>
+              </MDBCol>
+            </MDBRow>
+          </MDBModalBody>
+          <MDBModalFooter>
+            <MDBBtn color='secondary' onClick={toggleShowDocumentList}>
+              Zpět
+            </MDBBtn>
+            <MDBBtn
+              onClick={() => {
+                setDetailFromList(true);
+                toggleShowDocumentList();
+                toggleShowDocumentDetail();
+                }
+              }
+            >
+              Vybrat
+            </MDBBtn>
+          </MDBModalFooter>
+        </MDBModalContent>
+      </MDBModalDialog>
+    }
+    </MDBModal>
+
+
+    {/* DOCUMENT DETAIL */}
+
+    <MDBModal tabIndex='-1' show={showDocumentDetail} setShow={setShowDocumentDetail}>
+    {activePartner === undefined || activeOrder === null || activeDocument === null ? '' :
+      <MDBModalDialog size="xl">
+        <MDBModalContent>
+          <MDBModalHeader>
+            <MDBModalTitle>{activePartner.partnerName}<br></br>{activeOrder.orderName}</MDBModalTitle>
+            <MDBBtn
+              type='button'
+              className='btn-close'
+              color='none'
+              onClick={toggleShowDocumentDetail}
+            ></MDBBtn>
+          </MDBModalHeader>
+          <MDBModalBody>
+            <MDBRow>
+              {/* 1. sloupec s daty */}
+              <MDBCol md='3'>
+                  <form>
+                    <a href={'https://drive.google.com/file/d/'+ activeDocument.fileId +'/view?usp=drivesdk'} target="_blank" className='mb-3'>
+                      Dokument
+                    </a>
+                    <MDBSelect
+                      label='Typ'
+                      name="documentType"
+                      id="documentType"
+                      data={getDocumentTypeSelectData(activeDocument.documentType)}
+                      className='mt-3 mb-3'
+                    />
+                    <MDBInput
+                      label='Název'
+                      name='documentName'
+                      id='documentName'
+                      value={activeDocument.documentName}
+                      className='mb-3'
+                    />
+                    <MDBInput
+                      label='Datum'
+                      name='documentDate'
+                      id='documentDate'
+                      value={activeDocument.documentDate}
+                      type='date'
+                      className='mb-3'
+                      onChange={onChange}
+                    />
+                    <MDBTextArea
+                      rows='4'
+                      label='Popis'
+                      name='documentDescription'
+                      id='documentDescription'
+                      value={activeDocument.description}
+                      wrapperClass="mb-4"
+                      className='mb-3'
+                    />
+                  </form>                
+              </MDBCol>
+
+              {/* 2. sloupec s nahledem */}
+              <MDBCol>
+                Nahled dokumentu                
+              </MDBCol>
+            </MDBRow>
+          </MDBModalBody>
+          <MDBModalFooter>
+            <MDBBtn color='secondary' 
+              onClick={() => {
+                  toggleShowDocumentDetail();
+                  if (detailFromList) toggleShowDocumentList();
+                }
+              }
+            >
+              Zpět
+            </MDBBtn>
+            { detailFromList ? '':
+              <MDBBtn color='warning'>Smazat&nbsp;&nbsp;
+                <MDBIcon far icon='trash-alt'
+                        onClick={onClickDocumentDelete(activeDocument.idDocument)}/>
+              </MDBBtn> 
+            }
+            <MDBBtn>Uložit</MDBBtn>
+          </MDBModalFooter>
+        </MDBModalContent>
+      </MDBModalDialog>
+    }
+    </MDBModal>    
+    </>
+  )
 }
 
+
 export default Administrace;
-
-/*          
-
-                  <MDBTreeTableItem values={['Personal', '15mb', 'Folder']} depth={1} className='Klasa neconeco'/>
-                  <MDBTreeTableItem values={['index', '5mb', <MDBRow><MDBCol>Alza a.s.</MDBCol><MDBCol>Faktura</MDBCol></MDBRow>]} depth={2} />
-                  <MDBTreeTableItem values={['index', '5mb', 'html']} depth={2} />
-                  <MDBTreeTableItem values={['my-cat', '0mb', 'webp']} depth={2} />
-                  <MDBTreeTableItem values={['Documents', '350mb', 'Folder']} depth={2} />
-                  <MDBTreeTableItem values={['Bill', '200mb', 'PDF']} depth={3} />
-                  <MDBTreeTableItem values={['Newspapers mentions', '50mb', 'PDF']} depth={3} />
-                  <MDBTreeTableItem values={['Ebooks', '100mb', 'zip']} depth={3} />
-                  <MDBTreeTableItem values={['Songs', '30mb', 'Folder']} depth={2} />
-                  <MDBTreeTableItem values={['Ode to JS', '10mb', 'mp3']} depth={3} />
-                  <MDBTreeTableItem values={['One more style', '10mb', 'mp3']} depth={3} />
-                  <MDBTreeTableItem values={['Bjork-Its-Oh-So-Quiet', '10mb', 'mp3']} depth={3} />                  
-
-      <div style={{ padding: '20px' }} className='text-center'>
-        <MDBBtn onClick={() => setBasicOpen(!basicOpen)}>
-          <MDBIcon fas icon='bars' />
-        </MDBBtn>
-      </div>
-
-      <MDBCard className='py-5 justify-content-center'>
-        <MDBCardBody >
-          <MDBSideNav isOpen={basicOpen} absolute getOpenState={(e: any) => setBasicOpen(e)}>
-          <MDBSideNavMenu>
-            partners.forEach(partnerItem => {
-              <MDBSideNavItem>
-                <MDBSideNavLink>
-                  partnerItem
-                </MDBSideNavLink>
-              </MDBSideNavItem>              
-            });
-          </MDBSideNavMenu>
-        </MDBSideNav>
-
-        <div style={{ padding: '20px' }} className='text-center'>
-          <MDBBtn onClick={() => setBasicOpen(!basicOpen)}>
-            <MDBIcon fas icon='bars' />
-          </MDBBtn>
-        </div>
-
-
-        </MDBCardBody>
-      </MDBCard>
-*/

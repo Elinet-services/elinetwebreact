@@ -21,3 +21,7 @@ div .formHead {
     --mdb-text-opacity: 1;
     color: inherit!important;
 }
+
+.treetable-sm th, .treetable-sm td {
+    padding: 0.5rem 1.4rem;
+}
