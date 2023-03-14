@@ -86,7 +86,7 @@ function Administrace()
       {partnerName:'Zdenek Ulrich 2', identification:{idPartner: 711}},
       {partnerName:'Roman Kubrt 3', identification:{idPartner: 811}},
       {partnerName:'Zdenek Ulrich 3', identification:{idPartner: 911}},
-      { partnerName:'Petr Macasek 2', identification:{idPartner: 1111}}
+      {partnerName:'Petr Macasek 2', identification:{idPartner: 1111}}
     ]
   };
 
@@ -96,6 +96,7 @@ function Administrace()
   //
   const [showDocumentDetail, setShowDocumentDetail] = useState(false);
   const [showDocumentList,   setShowDocumentList]   = useState(false);
+  const [showOrderDetail,    setShowOrderDetail]    = useState(false);
   const [detailFromList,     setDetailFromList]     = useState(false); //  detail dokumentu zobrazen z Prehledu
   //
   const [documentFormValue, setDocumentFormValue] = useState({
@@ -117,6 +118,7 @@ function Administrace()
   }
   const toggleShowDocumentDetail = () => setShowDocumentDetail(!showDocumentDetail);
   const toggleShowDocumentList = () => setShowDocumentList(!showDocumentList);
+  const toggleShowOrderDetail = () => setShowOrderDetail(!showOrderDetail);
   
   let partners = {
     columns:  [
@@ -170,9 +172,9 @@ function Administrace()
                                                       <MDBIcon far icon='plus-square'
                                                         onClick={ () => {
                                                           setActiveOrder(order);
-                                                          setShowDocumentList(!showDocumentList);
+                                                          toggleShowDocumentList();
                                                         }
-                                                      }            
+                                                      }
                                                       />
                                                     )}
                                                   </MDBCol>
@@ -187,7 +189,7 @@ function Administrace()
                                             setActiveOrder(order);
                                             setActiveDocument(document);
                                             setDetailFromList(false);
-                                            setShowDocumentDetail(!showDocumentDetail);
+                                            toggleShowDocumentDetail()
                                           }
                                         }
                                         values={[ <MDBRow>
@@ -231,6 +233,7 @@ function Administrace()
     <>
     <MDBContainer className="py-5">
       <MDBRow>
+        {/* SEZNAM PARTNERU */}
         <MDBCol md='3'>
           <MDBCard>
             <MDBCardBody>
@@ -238,12 +241,11 @@ function Administrace()
                 pagination={false}
                 hover
                 entries={9999}
-                bordered            
-                allText='Vše'
-                ofText='z'
-                rowsText='Řádek'
+                bordered
+                noFoundMessage = 'Partner nenalezen'
+                allText='Vše' rowsText='Řádek' ofText='z' 
                 fixedHeader search striped sm
-                onRowClick={(row) => {               
+                onRowClick={(row) => {
                     setActivePartner(row);
                     setActiveOrder(null);
                     setActiveDocument(null);
@@ -252,11 +254,13 @@ function Administrace()
                 data={partners} />
             </MDBCardBody>
           </MDBCard>
-        </MDBCol>              
+        </MDBCol>
+
+        {/* SEZNAM ZAKAZEK */}
         <MDBCol md='9'>
           <MDBCard>
             <MDBCardBody>
-              <MDBCardTitle>{activePartner == undefined ? '' : activePartner.partnerName }</MDBCardTitle>
+              <MDBCardTitle>{activePartner == null ? '' : activePartner.partnerName }</MDBCardTitle>
               <MDBTreeTable className="treetable-sm">
                 <MDBTreeTableHead heads={[<MDBRow>
                                             <MDBCol md='3'>Zakázka</MDBCol>
@@ -264,15 +268,22 @@ function Administrace()
                                             <MDBCol md='2' className="d-flex justify-content-end">Datum do</MDBCol>
                                             <MDBCol md='4'>Popis</MDBCol>
                                             <MDBCol md='1' className="d-flex justify-content-end">
-                                              <MDBIcon far icon='plus-square'                                                          
-                                                        />
+                                              {activePartner == null ? '' : 
+                                                <MDBIcon far icon='plus-square'
+                                                onClick={ () => {
+                                                  setActiveOrder(
+                                                    {idOrder:null, orderName:'', description: '', dateFrom: '', dateTo: '', closed: false, documents: {} }
+                                                  );
+                                                  toggleShowOrderDetail();
+                                                }
+                                              }                                                               
+                                                /> }                                              
                                             </MDBCol>
                                           </MDBRow>]} />
                 <MDBTreeTableBody>
                   {createOrderTreeTable()}
                 </MDBTreeTableBody>
               </MDBTreeTable>
-
             </MDBCardBody>
           </MDBCard>
         </MDBCol>
@@ -283,7 +294,7 @@ function Administrace()
     {/* DOCUMENT LIST */}
 
     <MDBModal tabIndex='-1' show={showDocumentList} setShow={setShowDocumentList}>
-    {activePartner == undefined || activeOrder === null ? '' :
+    {activeOrder == null ? '' :
       <MDBModalDialog size="xl">
         <MDBModalContent>
           <MDBModalHeader>
@@ -303,10 +314,9 @@ function Administrace()
                 pagination={false}
                 hover
                 entries={9999}
-                bordered            
-                allText='Vše'
-                ofText='z'
-                rowsText='Řádek'
+                bordered
+                noFoundMessage = 'Dokument nenalezen'
+                allText='Vše' rowsText='Řádek' ofText='z'
                 fixedHeader search striped sm
                 onRowClick={(row) => {
                     setActiveDocument(row.parameters);
@@ -367,7 +377,7 @@ function Administrace()
     {/* DOCUMENT DETAIL */}
 
     <MDBModal tabIndex='-1' show={showDocumentDetail} setShow={setShowDocumentDetail}>
-    {activePartner === undefined || activeOrder === null || activeDocument === null ? '' :
+    {activeDocument == null ? '' :
       <MDBModalDialog size="xl">
         <MDBModalContent>
           <MDBModalHeader>
@@ -419,7 +429,7 @@ function Administrace()
                       wrapperClass="mb-4"
                       className='mb-3'
                     />
-                  </form>                
+                  </form>
               </MDBCol>
 
               {/* 2. sloupec s nahledem */}
@@ -449,7 +459,80 @@ function Administrace()
         </MDBModalContent>
       </MDBModalDialog>
     }
-    </MDBModal>    
+    </MDBModal>
+
+
+    {/* ZAKAZKA DETAIL */}
+
+    <MDBModal tabIndex='-1' show={showOrderDetail} setShow={setShowOrderDetail}>
+    {activePartner == null || activeOrder == null ? '' :
+      <MDBModalDialog size="sm">
+        <MDBModalContent>
+          <MDBModalHeader>
+            <MDBModalTitle>{activePartner.partnerName}<br></br>Nová zakázka</MDBModalTitle>
+            <MDBBtn
+              type='button'
+              className='btn-close'
+              color='none'
+              onClick={toggleShowOrderDetail}
+            ></MDBBtn>
+          </MDBModalHeader>
+          <MDBModalBody>
+            <MDBRow>
+              {/* 1. sloupec s daty */}
+              <MDBCol>
+                  <form>
+                    <MDBInput
+                      label='Název zakázky'
+                      name='orderName'
+                      id='orderName'
+                      value={activeOrder.orderName}
+                      className='mb-3'
+                    />
+                    <MDBInput
+                      label='Datum od'
+                      name='dateFrom'
+                      id='dateFrom'
+                      value={activeOrder.dateFrom}
+                      type='date'
+                      className='mb-3'
+                    />
+                    <MDBInput
+                      label='Datum do'
+                      name='dateTo'
+                      id='dateTo'
+                      value={activeOrder.dateTo}
+                      type='date'
+                      className='mb-3'
+                    />
+                    <MDBTextArea
+                      rows='4'
+                      label='Popis'
+                      name='orderDescription'
+                      id='orderDescription'
+                      value={activeOrder.description}
+                      wrapperClass="mb-4"
+                      className='mb-3'
+                    />
+                  </form>
+              </MDBCol>
+            </MDBRow>
+          </MDBModalBody>
+          <MDBModalFooter>
+            <MDBBtn color='secondary' 
+              onClick={() => {
+                  toggleShowOrderDetail();
+                }
+              }
+            >
+              Zpět
+            </MDBBtn>
+            <MDBBtn>Uložit</MDBBtn>
+          </MDBModalFooter>
+        </MDBModalContent>
+      </MDBModalDialog>
+    }
+    </MDBModal>
     </>
   )
 }
