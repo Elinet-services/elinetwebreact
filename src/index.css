@@ -25,3 +25,15 @@ div .formHead {
 .treetable-sm th, .treetable-sm td {
     padding: 0.5rem 1.4rem;
 }
+
+.autocomplete-custom-item-content {
+  display: flex;
+  flex-direction: column;
+}
+.autocomplete-custom-item-subtitle {
+  font-size: 0.8rem;
+}
+li.autocomplete-no-results {
+  font-size: 0.9rem;
+  font-style: italic;
+}

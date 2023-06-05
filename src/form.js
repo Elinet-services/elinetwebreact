@@ -53,6 +53,7 @@ function ContactForm() {
       /* for (const pair of formData.entries()) {
         console.log(pair[0] +', '+ pair[1]);
       } */
+      console.log(formData);
       //formData.append('ipAddress', ...)
       setSubmited(true) //  nastavime odeslano
 
@@ -72,7 +73,7 @@ function ContactForm() {
           console.log(response)
           if (!response.ok) {
             setError(true)
-            return { result: "Nepodarilo se odeslat" }
+            return { message: "Nepodarilo se odeslat" }
           } else {
             setFormValue({ name: "", email: "", phone: "", message: "", password: "" })
             document.getElementById('contactForm').reset();
@@ -80,8 +81,8 @@ function ContactForm() {
           }
         })
         .then((responseData) => {
-          console.log(responseData.result)
-          setResponseMessage(responseData.result)
+          console.log(responseData.message)
+          setResponseMessage(responseData.message)
         })
         .catch((e) => {
           console.log(e.message)

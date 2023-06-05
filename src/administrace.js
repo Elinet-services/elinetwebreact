@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import {
-  MDBCard, MDBCardBody, MDBCardTitle, MDBContainer,
+  MDBCard, MDBCardBody, MDBContainer,
   MDBInput, MDBSelect, MDBTextArea,
   MDBDatatable,
   MDBIcon,
@@ -17,123 +17,71 @@ import {
   MDBModalFooter,
   MDBPopconfirm,
   MDBPopconfirmMessage,
+  MDBAutocomplete,
+  MDBSpinner,
+  MDBAlert
 } from 'mdb-react-ui-kit';
 
-import { MDBTreeTable, MDBTreeTableItem, MDBTreeTableHead, MDBTreeTableBody } from 'mdb-react-treetable';
-import "mdb-react-treetable/dist/css/treetable.min.css"
+//import { MDBTreeTable, MDBTreeTableItem, MDBTreeTableHead, MDBTreeTableBody } from 'mdb-react-treetable';
+//import "mdb-react-treetable/dist/css/treetable.min.css"
 
 
 function Administrace()
 {
+  const submitAlertMessage = useRef(null);        //  zobrazeni responseMessage v MDBAlertu po volani DB
+  const [loading, setLoading] = useState(false);  //  volani do DB
+  const [error, setError] = useState(false);      //  volani do DB vtratilo chybu
+  const [responseMessage, setResponseMessage] = useState(''); //  textova zprava volani do DB
+  const [showDocumentDetail, setShowDocumentDetail] = useState(false);  //  priznak, zobrazit detail dokumentu
+  const [imageThumbnailData, setImageThumbnailData] = useState('');     //  obrazek nahledu dokumentu
+
+  const [documentTypeList, setDocumentTypeList] = useState([
+    {value: 'FP', text: 'Faktura přijatá', defaultSelected: false},
+    {value: 'FV', text: 'Faktura vydaná', defaultSelected: false},
+    {value: 'D',  text: 'Dokument', defaultSelected: false} ]
+  );
+
   /*  SEZNAM DOKUMENTU NA DISKU */
-  const documents = {
+  const [documentList, setDocumentList] = useState({
     columns:  [
-                {label:'Soubor', field:'displayName'}
-              ], 
-    rows: [
-      { displayName:'9707757846.pdf', parameters:{documentName: '9707757846', documentType: '', documentDescription: 'popisek', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8a'} },
-      { displayName:'AppSheet Invoice 20201219.pdf', parameters:{documentName: 'AppSheet Invoice 20201219', documentType: '', documentDescription: 'neco neco', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8b'}},
-      { displayName:'INV05501595.pdf', parameters:{documentName: '3', documentType: '', documentDescription: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8c'} },  
-      { displayName:'100220406.pdf', parameters:{documentName: '4', documentType: '', documentDescription: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8d'} },
-      { displayName:'AXL 20220102_POV1220002.pdf', parameters:{documentName: '5', documentType: '', documentDescription: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8e'} },
-      { displayName:'Zálohová_faktura_2260400136.pdf', parameters:{documentName: '', documentType: '', documentDescription: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8f'} },
-      { displayName:'Elnika 20211027.pdf', parameters:{documentName: '', documentType: '', documentDescription: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8g'} },
-      { displayName:'Uber 20220104.pdf', parameters:{documentName: '', documentType: '', documentDescription: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8h'} },
-      { displayName:'Alza 20210219_2211903041.pdf', parameters:{documentName: '', documentType: '', documentDescription: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8i'} },
-      { displayName:'Alza 20210403_2213538727.pdf', parameters:{documentName: '', documentType: '', documentDescription: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8j'} },
-      { displayName:'Liftago 20211117_1463.pdf', parameters:{documentName: '', documentType: '', documentDescription: '', documentDate: '2022-06-15', fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8k'} },
-    ]
-  };
+      {label:'Soubor', field:'name', sort: true},
+      {label:'Typ dokumentu', field:'typeText', sort: true},
+      {label:'Datum vystavení', field:'issueDateText', sort: true},
+      {label:'Datum expirace', field:'expireDateText', sort: true}
+    ], 
+    rows: []
+  });
+
+  /*  SEZNAM PARTNERU  */
+  const [partnerDataAll, setPartnerDataAll] = useState([]);
+  const [partnerData, setPartnerData] = useState([]); //  odfiltrovany seznam
+
+  /*  SEZNAM ZAKAZEK  */
+  const [orderDataAll, setOrderDataAll] = useState([]);
+  const [orderData, setOrderData] = useState([]);     //  odfiltrovany seznam
   
   //  -------------------------------------------------------------------------------
-  //  data poslana z DB
-  const httpResponse = {
-    sourceData: [
-      { partnerName:'Petr Macasek', identification:{idPartner: 111},
-        orders:{
-            111: { 
-              orderName:'Ostrovni system', description: 'Strucny popis zakazky', dateFrom: '2022-03-13', dateTo: '2022-07-20', closed: false,
-              documents: {
-                '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z': {documentName: 'Plast partner spol. s r.o.', documentType: 'FP', documentDescription: 'popis dokumentu', documentDate: '2022-07-12',
-                        fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'},                        
-                '2ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z': {documentName: 'Uctujeme za zbozi', documentType: 'FV',documentDescription: 'Zarucak specialni', documentDate: '2022-11-07',
-                        fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'},
-                },
-            },
-            222: { 
-              orderName:'Zabezpeceni', description: 'Zakazka 111.2 popisek', dateFrom: '2022-06-01', dateTo: '2022-07-30', closed: true,
-              documents: {
-                '3ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z': {documentName: 'Conrad Electronic', documentType: 'FP', documentDescription: 'Strucny popis dokumentu', documentDate: '2022-08-03',
-                        fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'},                
-                '4ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z': {documentName: 'Zaruka na zabezpečení', documentType: 'Z', documentDescription: 'dokumentik popisek', documentDate: '2022-11-20',
-                        fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'}
-              }
-            }
-          }
-      },
-      { partnerName:'Roman Kubrt', identification:{idPartner: 211},
-        orders:{
-          113: { 
-            orderName:'Vyhledavaci system', description: 'Zakazka uplne normalni', dateFrom: '2022-08-11', dateTo: '2023-02-27', closed: true,
-            documents: {
-              '5ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z': {documentName: 'Ostrovní elektrárny s.r.o.', documentType: 'FV', documentDescription: 'Dokument s nejakym hrozne dlouhym textickem ktery se nevejde do policka', documentDate: '2022-06-15',
-                      fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'},
-              '6ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z': {documentName: 'Zaruka na vyhledani psa', documentType: 'Z', documentDescription: 'Strucny popis dokumentu', documentDate: '2022-10-13',
-                      fileId: '1ijF4bU-6ZBlkBjvlbZwwXSYCntLdl_8Z'},
-            }
-          }
-        }
-      },
-      { partnerName:'Zdenek Ulrich', identification:{idPartner: 311},
-        orders:{
-          114: { 
-            orderName:'Vyhledavaci system', description: 'Zakazka uplne normalni', dateFrom: '2022-08-11', dateTo: '2023-02-27', closed: false,
-            documents: {}
-          }
-        }
-      },
-      {partnerName:'Petr Macasek 1.5', identification:{idPartner: 411}, orders:{}},
-      {partnerName:'Petr Macasek 2', identification:{idPartner: 511}, orders:{}},
-      {partnerName:'Roman Kubrt 2', identification:{idPartner: 611}, orders:{}},
-      {partnerName:'Zdenek Ulrich 2', identification:{idPartner: 711}, orders:{}},
-      {partnerName:'Roman Kubrt 3', identification:{idPartner: 811}, orders:{}},
-      {partnerName:'Zdenek Ulrich 3', identification:{idPartner: 911}, orders:{}},
-      {partnerName:'Petr Macasek 2', identification:{idPartner: 1111}, orders:{}}
-    ]
-  };
+  //  volani DB pro uvodni nacteni z DB
+  useEffect(() => {
+    const loadData = () => {
+      const formData = new FormData();
+      formData.append("action", 'loadData');
+      
+      processRequest(formData);
+    };
+
+    loadData();
+  }, []);
 
   //  -------------------------------------------------------------------------------
-  const [partners, setPartners] = useState(
-    { columns:  [{label:'Klient', field:'partnerName'}], 
-      rows: httpResponse.sourceData }  
-  );
-  const [activePartner,   setActivePartner] = useState(null);
-  const [activeOrder,     setActiveOrder] = useState({orderId: 0, order: {orderName:'', description: '', dateFrom: '', dateTo: '', closed: false, documents: {}}});
-  const [activeDocument,  setActiveDocument] = useState({fileId: '0', document: {documentName:'', documentType: '', documentDescription: '', documentDate: '', fileId: '0' }});
-  const [documentTypeList, setDocumentTypeList] = useState([]);
-  //
-  const [showDocumentDetail, setShowDocumentDetail] = useState(false);
-  const [showDocumentList,   setShowDocumentList]   = useState(false);
-  const [showOrderDetail,    setShowOrderDetail]    = useState(false);
-  const [detailFromList,     setDetailFromList]     = useState(false); //  detail dokumentu zobrazen z Prehledu dokumentů
-  //
-  const [orderFormValue, setOrderFormValue] = useState({
-    orderName: '', dateFrom: '', dateTo: '', description: '', closed: false
-  });
-  const [documentFormValue, setDocumentFormValue] = useState({
-    documentType: '', documentName: '', documentDescription: '', documentDate: ''
-  });
-
   //  zobrazeni Modalnich oken
   const toggleShowDocumentDetail = () => setShowDocumentDetail(!showDocumentDetail);
-  const toggleShowDocumentList = () => setShowDocumentList(!showDocumentList);
-  const toggleShowOrderDetail = () => setShowOrderDetail(!showOrderDetail);  
 
   //  -------------------------------------------------------------------------------
   //  preformatuje datum z DB k zobrazeni v prehledu
-  function formatDate(aDate) {
+  function formatDate(aDate, aDocumentType) {
     let dateString = '';
-    if (aDate != null) {
+    if (aDocumentType !== 'D' && aDate != null) {
       const firstDot = aDate.indexOf('-');
       const lastDot  = aDate.lastIndexOf('-');
       //  kontrola
@@ -142,48 +90,7 @@ function Administrace()
     }
     return dateString;
   }
-
-  //  vrati radek v poli partners (podle idPartner)
-  function getPertnerRow(aIdPartner) {
-    for (let row in partners.rows) {
-      if (partners.rows[row].identification.idPartner === aIdPartner)
-        return row;
-    }
-    return -1;
-  }
-  //  -------------------------------------------------------------------------------
-  /* obsluha ZAKAZKA formular */
-  const onChangeOrderForm = (e) => {
-    setOrderFormValue({ ...orderFormValue, [e.target.name]: e.target.value })
-  }
-  function submitOrderForm(e)
-  {
-    e.preventDefault();
-    const partnerRow = getPertnerRow(activePartner.identification.idPartner);
-    // SAVE DO DB, pripadne vraci NOVY idOrder
-    // TODO
-    //
-    for (let key in orderFormValue) {
-      activeOrder.order[key] = orderFormValue[key];
-    }
-    partners.rows[partnerRow].orders[activeOrder.orderId] = activeOrder.order;
-   
-    toggleShowOrderDetail();
-  }
-
-  //  -------------------------------------------------------------------------------
-  /* obsluha DOCUMENT formular */
-  const onChangeDocumentForm = (e) => {
-    setDocumentFormValue({ ...documentFormValue, [e.target.name]: e.target.value })
-  }
-  function onChangeDocumentFormSelect(value) {
-    documentFormValue.documentType = value;
-    setDocumentTypeList ( [
-      {value: 'FP', text: 'Faktura přijatá', defaultSelected: value === 'FP'},
-      {value: 'FV', text: 'Faktura vydaná', defaultSelected: value === 'FV'},
-      {value: 'Z',  text: 'Záruční list', defaultSelected: value === 'Z'} 
-    ]);
-  }
+  //  vrati text typu dokumentu (pro prehled dokumentu)
   function getDocumentTypeText(documentType) {
     for (let item in documentTypeList) {
       if (documentTypeList[item].value === documentType )
@@ -191,102 +98,159 @@ function Administrace()
     }
     return '';
   }
-
-  function onClickDocumentDelete()
-  {
-    const partnerRow = getPertnerRow(activePartner.identification.idPartner);
-    // SAVE DO DB
-    // TODO
-    //
-    delete partners.rows[partnerRow].orders[activeOrder.orderId].documents[activeDocument.fileId];
-    toggleShowDocumentDetail();    
+  //  plni comboBox documentType podle hodnoty (nastavi defaultSelected = true)
+  const updateDocumentTypeItem = (index, selected) => {
+    let newArr = [...documentTypeList];
+    newArr[index].defaultSelected = selected;
+    setDocumentTypeList(newArr);
   }
-
-  function submitDocumentForm(e)
-  {
-    e.preventDefault();
-    const partnerRow = getPertnerRow(activePartner.identification.idPartner);
-    // SAVE DO DB
-    // TODO
-    //
-    for (let key in documentFormValue) {
-      activeDocument.document[key] = documentFormValue[key];
+  const fillDocumentTypeList = (documentTypeValue) => {
+    for (let item in documentTypeList) {
+      updateDocumentTypeItem(item, documentTypeList[item].value === documentTypeValue)
     }
-    partners.rows[partnerRow].orders[activeOrder.orderId].documents[activeDocument.fileId] = activeDocument.document;
-   
-    toggleShowDocumentDetail();
+  }
+ 
+  //  -------------------------------------------------------------------------------
+  /* obsluha DOCUMENT formular */
+  const [documentFormValue, setDocumentFormValue] = useState({
+    fileId: '', type: '', name: '', issueDate: '', expireDate: '', 
+    //idPartner: '', idOrder: '', 
+    description: '', partnerName:'', orderName: ''
+  });
+  //  normalni INPUT
+  const onChangeDocumentForm = (e) => {
+    setDocumentFormValue({ ...documentFormValue, [e.target.name]: e.target.value })
+  }
+  //  combobox documentType
+  const onChangeDocumentFormType = (e) => {
+    setDocumentFormValue({ ...documentFormValue, type: e.value });
+//    if (e.value != 'D')
+      //setDocumentFormValue({ ...documentFormValue, expireDate: '' });
+  }
+  //  combobox Partner
+  const onChangeDocumentFormPartner = (value) => {
+    setDocumentFormValue({ ...documentFormValue, partnerName: value });
+  }
+  const onSearchDocumentFormPartner = (value) => {
+    let partners = (partnerDataAll.filter((item) => item.partnerName.toLowerCase().startsWith(value.toLowerCase())));
+    setPartnerData(partners);
+    if (partners.length === 1) { //  pokud mame prave jeden partner filtrovany
+      setOrderDataAll(partners[0].orderList);
+      setOrderData(partners[0].orderList);
+    } else {
+      setOrderDataAll([]);
+      setOrderData([]);
+    }
+  }
+  //  combobox Zakazka
+  const onChangeDocumentFormOrder = (value) => {
+    setDocumentFormValue({ ...documentFormValue, orderName: value });
+  }
+  const onSearchDocumentFormOrder = (value) => {    
+    let orders = (orderDataAll.filter((item) => item.orderName.toLowerCase().startsWith(value.toLowerCase())));
+    setOrderData(orders);
   }
 
   //  -------------------------------------------------------------------------------
-  /* PREHLED ZAKAZEK a DOKUMENTU */
-  function createOrderTreeTable()
+  //  odesle data do DB
+  function processRequest(formData)
   {
-    let retArr = new Array([]);
-    if (activePartner !== null && activePartner.orders !== undefined) {
-      Object.keys(activePartner.orders).forEach(idOrder => {
-        const order = activePartner.orders[idOrder];
-        /* HLAVICKA ZAKAZKY */
-        retArr.push(<MDBTreeTableItem key={'idOrder'+ idOrder}
-                                      depth={1}
-                                      values={[ <MDBRow>
-                                                  <MDBCol md='3'
-                                                    onClick={ () => {
-                                                          setActiveOrder( {orderId: idOrder, order} );
-                                                          setOrderFormValue(order);
-                                                          toggleShowOrderDetail();
-                                                        }
-                                                      }
-                                                    >{order.orderName}</MDBCol>
-                                                  <MDBCol md='2' className="d-flex justify-content-end">{formatDate(order.dateFrom)}</MDBCol>
-                                                  <MDBCol md='2' className="d-flex justify-content-end">{formatDate(order.dateTo)}</MDBCol>
-                                                  <MDBCol md='4' className="overflow-hidden text-nowrap">{order.description}</MDBCol>
-                                                  <MDBCol md='1' className="d-flex justify-content-end align-items-center">
-                                                    {(order.closed ? '':
-                                                      <MDBIcon far icon='plus-square'
-                                                        onClick={ () => {
-                                                          setActiveOrder( {orderId: idOrder, order} );
-                                                          setActiveDocument({fileId: 0, document: {documentName:'', documentType: '', documentDescription: '', documentDate: '', fileId: '' }});
-                                                          toggleShowDocumentList();
-                                                        }
-                                                      }
-                                                      />
-                                                    )}
-                                                  </MDBCol>
-                                                </MDBRow>]}
-                                      className={(order.closed?'table-secondary':'')}/>)
+    //const url = "https://script.google.com/macros/s/AKfycbxSRRBE6BrXcSDUenhUY33C6UPkLaX9Ps9CAGYA5VwEllrq95LP0nROCn_a_K5TXtVNhA/exec";
+    const url = "https://script.google.com/macros/s/AKfycbzjthLfYNaLHfNd57DSnF_NZ2v-JMwmBRJnPiFhYeCcbJ5o5HCCZOoLhaQmsnLfid4MAA/exec";
+    if (formData.get('action') !== 'getThumbnailData')
+      setLoading(true);
+    setError(false);
+    setResponseMessage('');
 
-        Object.keys(order.documents).forEach(idDocument => {
-          const document = order.documents[idDocument];
-          retArr.push(<MDBTreeTableItem key={'idDocument'+ idDocument} 
-                                        depth={2} 
-                                        onClick={ () => {
-                                            setActiveOrder( {orderId: idOrder, order} );
-                                            setActiveDocument( {fileId: idDocument, document} );
-                                            setDocumentFormValue(document)
-                                            onChangeDocumentFormSelect(document.documentType);
-                                            setDetailFromList(false);
-                                            toggleShowDocumentDetail()
-                                          }
-                                        }
-                                        values={[ <MDBRow>
-                                                    <MDBCol md='3'>{document.documentName}</MDBCol>
-                                                    <MDBCol md='2'>{getDocumentTypeText(document.documentType)}</MDBCol>
-                                                    <MDBCol md='2' className="d-flex justify-content-end">{formatDate(document.documentDate)}</MDBCol>
-                                                    <MDBCol md='5' className="overflow-hidden text-nowrap">{document.documentDescription}</MDBCol>
-                                                    { /* ikona DELETE DOCUMENT
-                                                      <MDBCol md='1' className="d-flex justify-content-end">
-                                                      {(order.closed ? '': 
-                                                        <MDBIcon far icon='trash-alt'
-                                                          onClick={onClickDocumentDelete()}
-                                                        /> 
-                                                      )}
-                                                    </MDBCol> */}
-                                                  </MDBRow>]}
-                                        className={(order.closed ? 'table-secondary':'')}/>)
-        })
-      });
+    formData.append("source", window.location.pathname.substring(1));    
+    
+    fetch(url, {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => {
+        /* if (response.status === 401) {
+          navigate('/login');
+        } */
+
+        if (!response.ok) {
+          setError(true)
+          return { message: "Nepodařilo se odeslat" }
+        } else {
+          return response.json()
+        }
+      })
+      .then((responseData) => {
+        //  console.log(responseData)
+        setResponseMessage(responseData.message);
+
+        if (formData.get('action') === 'getThumbnailData'){  //zpracuj nahled dokumentu
+          let imageContent = '';
+          const bytes = new Uint8Array( responseData.adminData.thumbnailData );
+          const len = bytes.byteLength;
+          for (let i = 0; i < len; i++) {
+            imageContent += String.fromCharCode( bytes[ i ] );
+          }
+          setImageThumbnailData( btoa(imageContent) );
+        }
+        else {
+          setPartnerDataAll(responseData.adminData.partnerList);
+          setPartnerData(responseData.adminData.partnerList);
+          let rows = [];
+          //  naplnit seznam dokumentu
+          responseData.adminData.documentList.forEach(function (row){
+            rows.push( {
+                fileId: row.fileId,
+                type: row.type, 
+                name: row.name, 
+                issueDate: row.issueDate,
+                expireDate: row.expireDate,
+                description: row.description,
+                partnerName: row.partnerName,
+                orderName: row.orderName,
+                typeText: getDocumentTypeText(row.type),
+                issueDateText: formatDate(row.issueDate, ''),
+                expireDateText: formatDate(row.expireDate, row.type)
+              }
+            )
+          })
+          setDocumentList({...documentList, rows});
+        }
+        setLoading(false);
+        if (responseData.message.length > 0 && formData.get('action') === 'submitForm')  //  zobrazit vysledek volani DB - responseMessage
+          submitAlertMessage.current.click();
+      })
+      .catch((e) => {
+        console.log(e.message)
+        setLoading(false);
+        setError(true);
+        setResponseMessage("Kritická chyba: "+ e.message);
+        submitAlertMessage.current.click();
+      })
+  }
+
+//  -------------------------------------------------------------------------------
+  //  odeslani formu do DB
+  function submitDocumentForm()
+  {    
+    const formData = new FormData();
+    formData.append("action", 'submitForm');
+    
+    for (let key in documentFormValue) {
+      formData.append(key, documentFormValue[key])
+      console.log(key +' - '+ documentFormValue[key])
     }
-    return retArr;
+    toggleShowDocumentDetail();
+    processRequest(formData);
+  }
+  //  nacteni nahledu dokumentu
+  function getThumbnailData(fileId)
+  {
+    const formData = new FormData();
+    formData.append("action", 'getThumbnailData');
+    formData.append("fileId", fileId);
+    setImageThumbnailData('');
+    processRequest(formData);
   }
   
   //  -------------------------------------------------------------------------------
@@ -296,152 +260,44 @@ function Administrace()
     <>
     <MDBContainer className="py-5">
       <MDBRow>
-        {/* SEZNAM PARTNERU */}
-        <MDBCol md='3'>
+        {/* SEZNAM DOKUMENTU */}
+        <MDBCol>
           <MDBCard>
             <MDBCardBody>
-              <MDBDatatable maxHeight='400px' maxWidth='300px' 
+              <MDBDatatable 
+                data={documentList} 
+                maxHeight='400px' 
                 pagination={false}
                 hover
                 entries={9999}
                 bordered
-                noFoundMessage = 'Partner nenalezen'
+                noFoundMessage = 'Dokument nenalezen'
                 allText='Vše' rowsText='Řádek' ofText='z' 
                 fixedHeader search striped sm
                 onRowClick={(row) => {
-                    setActivePartner(row);
+                    setDocumentFormValue(
+                      {fileId: row.fileId, type: row.type, name: row.name, issueDate: row.issueDate, expireDate: row.expireDate,
+                        description: row.description, partnerName: row.partnerName, orderName: row.orderName}
+                    );
+                    fillDocumentTypeList(row.type);
+                    onSearchDocumentFormPartner(row.partnerName);
+                    getThumbnailData(row.fileId);
+                    toggleShowDocumentDetail();
                   }
                 }
-                data={partners} />
-            </MDBCardBody>
-          </MDBCard>
-        </MDBCol>
-
-        {/* SEZNAM ZAKAZEK */}
-        <MDBCol md='9'>
-          <MDBCard>
-            <MDBCardBody>
-              <MDBCardTitle>{activePartner == null ? '' : activePartner.partnerName}</MDBCardTitle>
-              <MDBTreeTable className="treetable-sm">
-                <MDBTreeTableHead heads={[<MDBRow>
-                                            <MDBCol md='3'>Zakázka</MDBCol>
-                                            <MDBCol md='2' className="d-flex justify-content-end">Datum od</MDBCol>
-                                            <MDBCol md='2' className="d-flex justify-content-end">Datum do</MDBCol>
-                                            <MDBCol md='4'>Popis</MDBCol>
-                                            <MDBCol md='1' className="d-flex justify-content-end align-items-center">
-                                              {activePartner == null ? '' :
-                                              <MDBIcon far icon='plus-square'
-                                                onClick={ () => {
-                                                    setActiveOrder(
-                                                      {orderId: 0, order: {orderName:'', description: '', dateFrom: '', dateTo: '', closed: false, documents: {}}}
-                                                    );
-                                                    setOrderFormValue( {orderName:'', description: '', dateFrom: '', dateTo: '', closed: false, documents: {}} );
-                                                    toggleShowOrderDetail();
-                                                  }
-                                                }
-                                            /> }
-                                            </MDBCol>
-                                          </MDBRow>]} />
-                <MDBTreeTableBody>
-                  {createOrderTreeTable()}
-                </MDBTreeTableBody>
-              </MDBTreeTable>
+              />
             </MDBCardBody>
           </MDBCard>
         </MDBCol>
       </MDBRow>
     </MDBContainer>
 
-
-    {/* DOCUMENT LIST */}
-
-    <MDBModal tabIndex='-1' show={showDocumentList} setShow={setShowDocumentList}>
-    {activeOrder == null ? '' :
-      <MDBModalDialog size="xl">
-        <MDBModalContent>
-          <MDBModalHeader>
-            <MDBModalTitle>{activePartner == null ? '' : activePartner.partnerName}<br></br>{orderFormValue.orderName}</MDBModalTitle>
-            <MDBBtn
-              type='button' className='btn-close' color='none'
-              onClick={toggleShowDocumentList}
-            ></MDBBtn>
-          </MDBModalHeader>
-          <MDBModalBody>
-            <MDBRow>
-              {/* 1. sloupec s daty */}
-              <MDBCol md='3'>
-              <MDBDatatable maxHeight='400px' maxWidth='300px' 
-                pagination={false} entries={9999}
-                hover bordered
-                noFoundMessage = 'Dokument nenalezen'
-                allText='Vše' rowsText='Řádek' ofText='z'
-                fixedHeader search striped sm
-                onRowClick={(row) => {
-                    setActiveDocument({fileId: row.parameters.fileId, document: row.parameters});
-                    setDocumentFormValue(row.parameters);
-                    //console.log(documentFormValue)
-                  }
-                }
-                data={documents} />
-              </MDBCol>
-
-              {/* 2. sloupec s nahledem + hlavicka dokumentu*/}
-              <MDBCol>
-                <MDBRow>
-                  <MDBCol>
-                    <MDBDatatable
-                      pagination={false} entries={9999}
-                      fixedHeader sm
-                      noFoundMessage = ''
-                      data = {{
-                          columns:  [
-                            {label:'Název dokumentu', field:'documentName', width: 200},
-                            {label:'Datum', field:'documentDate', width: 200},
-                            {label:'Popis', field:'documentDescription'}
-                          ], 
-                          rows: activeDocument.fileId === '0' ? [] :
-                                [{documentName: activeDocument.document.documentName, documentDate: formatDate(activeDocument.document.documentDate), documentDescription: activeDocument.document.documentDescription}]
-                        }
-                      }
-                    />
-                  </MDBCol>
-                </MDBRow>
-                <MDBRow>
-                  <MDBCol>Nahled dokumentu</MDBCol>
-                </MDBRow>
-              </MDBCol>
-            </MDBRow>
-          </MDBModalBody>
-          <MDBModalFooter>
-            <MDBBtn color='secondary' onClick={toggleShowDocumentList}>
-              Zpět
-            </MDBBtn>
-            <MDBBtn
-              onClick={() => {
-                  setDetailFromList(true);
-                  setDocumentFormValue(activeDocument.document);
-                  onChangeDocumentFormSelect('FP');
-                  toggleShowDocumentList();
-                  toggleShowDocumentDetail();
-                }
-              }
-            >
-              Vybrat
-            </MDBBtn>
-          </MDBModalFooter>
-        </MDBModalContent>
-      </MDBModalDialog>
-    }
-    </MDBModal>
-
-
-    {/* DOCUMENT DETAIL */}
-
+    {/* DETAIL DOCUMENTU */}
     <MDBModal tabIndex='-1' show={showDocumentDetail} setShow={setShowDocumentDetail}>
       <MDBModalDialog size="xl">
         <MDBModalContent>
           <MDBModalHeader>
-            <MDBModalTitle>{activePartner == null ? '' : activePartner.partnerName}<br></br>{activeOrder.order.orderName}</MDBModalTitle>
+            <MDBModalTitle>{documentFormValue.name}</MDBModalTitle>
             <MDBBtn
               type='button' className='btn-close' color='none'
               onClick={toggleShowDocumentDetail}
@@ -452,41 +308,86 @@ function Administrace()
               {/* 1. sloupec s daty */}
               <MDBCol md='3'>
                   <form>
-                    <a href={'https://drive.google.com/file/d/'+ activeDocument.fileId +'/view?usp=drivesdk'} target="_blank" className='mb-3'>
+                    <a href={'https://drive.google.com/file/d/'+ documentFormValue.fileId +'/view?usp=drivesdk'} target="_blank" rel="noreferrer" className='mb-3'>
                       Dokument
                     </a>
                     <MDBSelect
                       label='Typ'
-                      name="documentType"
-                      id="documentType"
+                      name="type"
+                      id="type"
                       data={documentTypeList}
                       className='mt-3 mb-3'
-                      validation
-                      onValueChange={(e) => onChangeDocumentFormSelect(e.value)}
+                      onValueChange={(e) => onChangeDocumentFormType(e)}
                     />
                     <MDBInput
                       label='Název'
-                      name='documentName'
-                      id='documentName'
-                      value={documentFormValue.documentName}
+                      name='name'
+                      id='name'
+                      value={documentFormValue.name}
                       className='mb-3'
                       onChange={onChangeDocumentForm}
                     />
                     <MDBInput
-                      label='Datum'
-                      name='documentDate'
-                      id='documentDate'
-                      value={documentFormValue.documentDate}
+                      label='Datum vystavení'
+                      name='issueDate'
+                      id='issueDate'
+                      value={documentFormValue.issueDate}
                       type='date'
                       className='mb-3'
                       onChange={onChangeDocumentForm}
                     />
+                    {documentFormValue.type === 'D'? 
+                    <MDBInput
+                      label='Datum expirace'
+                      name='expireDate'
+                      id='expireDate'
+                      value={documentFormValue.expireDate}
+                      type='date'
+                      className='mb-3'
+                      onChange={onChangeDocumentForm}
+                    /> : ''}
+                    <MDBAutocomplete
+                        label='Klient'
+                        name='partner'
+                        id='partner'
+                        data={partnerData}
+                        displayValue={(row) => row.partnerName}
+                        value={documentFormValue.partnerName}
+                        onSearch={onSearchDocumentFormPartner}
+                        onChange={onChangeDocumentFormPartner}
+                        itemContent={(result) => (
+                          <div className='autocomplete-custom-item-content'>
+                            <div className='autocomplete-custom-item-title'>{result.partnerName}</div>
+                            <div className='autocomplete-custom-item-subtitle'>{result.description}</div>
+                          </div>)}
+                        className='mb-3'
+                        listHeight='250px'
+                        noResults='Klient nenalezen'
+                    />                    
+                    <MDBAutocomplete
+                        label='Zakázka'
+                        name='order'
+                        id='order'
+                        data={orderData}
+                        displayValue={(row) => row.orderName}
+                        value={documentFormValue.orderName}
+                        onSearch={onSearchDocumentFormOrder}
+                        onChange={onChangeDocumentFormOrder}
+                        itemContent={(result) => (
+                          <div className='autocomplete-custom-item-content'>
+                            <div className='autocomplete-custom-item-title'>{result.orderName}</div>
+                            <div className='autocomplete-custom-item-subtitle'>{result.description}</div>
+                          </div>)}
+                        className='mb-3'
+                        listHeight='250px'
+                        noResults='Zakázka nenalezena'
+                    />                    
                     <MDBTextArea
                       rows='4'
                       label='Popis'
-                      name='documentDescription'
-                      id='documentDescription'
-                      value={documentFormValue.documentDescription}
+                      name='description'
+                      id='description'
+                      value={documentFormValue.description}
                       wrapperClass="mb-4"
                       className='mb-3'
                       onChange={onChangeDocumentForm}
@@ -496,7 +397,7 @@ function Administrace()
 
               {/* 2. sloupec s nahledem */}
               <MDBCol>
-                Nahled dokumentu
+                <img src={`data:image/jpeg;base64,${imageThumbnailData}`} className='img-fluid shadow-4' alt={documentFormValue.name} />
               </MDBCol>
             </MDBRow>
           </MDBModalBody>
@@ -504,104 +405,61 @@ function Administrace()
             <MDBBtn color='secondary' 
               onClick={() => {
                   toggleShowDocumentDetail();
-                  if (detailFromList) toggleShowDocumentList();
                 }
               }
             >
               Zpět
             </MDBBtn>
-            { detailFromList || activeOrder.order.closed ? '':
-              <MDBPopconfirm
-                color='warning'
-                btnChildren={<div>Smazat&nbsp;&nbsp;<MDBIcon far icon='trash-alt'/></div>}
-                cancelBtnText='NE'
-                cancelBtnClasses='btn-secondary'
-                confirmBtnText='Smazat'
-                confirmBtnClasses='btn-warning'
-                onConfirm={() => {onClickDocumentDelete()}}
-              >
-                <MDBPopconfirmMessage icon={<MDBIcon far icon='trash-alt'/>}> Opravdu smazat dokument {documentFormValue.documentName}?</MDBPopconfirmMessage>
-              </MDBPopconfirm>
-            }
-            <MDBBtn type="submit" onClick={submitDocumentForm}>Uložit</MDBBtn>
+            <MDBPopconfirm
+              color='warning'
+              btnChildren={<div>Smazat&nbsp;&nbsp;<MDBIcon far icon='trash-alt'/></div>}
+              cancelBtnText='NE'
+              cancelBtnClasses='btn-secondary'
+              confirmBtnText='Smazat'
+              confirmBtnClasses='btn-warning'
+              //onConfirm={() => {onClickDocumentDelete()}}
+            >
+              <MDBPopconfirmMessage icon={<MDBIcon far icon='trash-alt'/>}> Opravdu smazat dokument {documentFormValue.name}?</MDBPopconfirmMessage>
+            </MDBPopconfirm>
+            <MDBBtn type="submit" 
+              onClick={submitDocumentForm}
+            >Uložit</MDBBtn>
           </MDBModalFooter>
         </MDBModalContent>
       </MDBModalDialog>
     </MDBModal>
 
-    {/* ZAKAZKA DETAIL */}
-
-    <MDBModal tabIndex='-1' show={showOrderDetail} setShow={setShowOrderDetail}>
-      <MDBModalDialog size="sm">
+    {/* Odeslani do DB */}
+    <MDBModal show={loading} tabIndex='-1' staticBackdrop>
+      <MDBModalDialog size="lg">
         <MDBModalContent>
           <MDBModalHeader>
-            <MDBModalTitle>{activePartner == null ? '' : activePartner.partnerName} <br/> {activeOrder.orderId === 0 ? 'Nová zakázka': ''}</MDBModalTitle>
-            <MDBBtn
-              type='button'className='btn-close' color='none'
-              onClick={toggleShowOrderDetail}
-            ></MDBBtn>
+            <MDBModalTitle>Odesílání do DB</MDBModalTitle>
           </MDBModalHeader>
           <MDBModalBody>
-            <MDBRow>
-              <MDBCol>
-                    <MDBInput
-                      label='Název zakázky'
-                      name='orderName'
-                      id='orderName'
-                      value={orderFormValue.orderName}
-                      className='mb-3'
-                      required
-                      onChange={onChangeOrderForm}
-                    />
-                    <MDBInput
-                      label='Datum od'
-                      name='dateFrom'
-                      id='dateFrom'
-                      value={orderFormValue.dateFrom}
-                      type='date'
-                      className='mb-3'
-                      required
-                      onChange={onChangeOrderForm}
-                    />
-                    <MDBInput
-                      label='Datum do'
-                      name='dateTo'
-                      id='dateTo'
-                      value={orderFormValue.dateTo}
-                      type='date'
-                      className='mb-3'
-                      onChange={onChangeOrderForm}
-                    />
-                    <MDBTextArea
-                      rows='4'
-                      label='Popis'
-                      name='description'
-                      id='description'
-                      value={orderFormValue.description}
-                      wrapperClass="mb-4"
-                      className='mb-3'
-                      onChange={onChangeOrderForm}
-                    />
-              </MDBCol>
-            </MDBRow>
+            <div className='text-center'>
+              <MDBSpinner role='status'/>
+            </div>
           </MDBModalBody>
-          <MDBModalFooter>
-            <MDBBtn color='secondary' 
-              onClick={() => {
-                  toggleShowOrderDetail();
-                }
-              }
-            >
-              Zpět
-            </MDBBtn>
-            <MDBBtn type='submit' onClick={submitOrderForm} >Uložit</MDBBtn>
-            
-          </MDBModalFooter>
         </MDBModalContent>
       </MDBModalDialog>
     </MDBModal>
+
+    {/* zobrazeni responseMessage */}
+    <MDBBtn className='visually-hidden' ref={submitAlertMessage}/>
+    <MDBAlert triggerRef={submitAlertMessage}
+        color={error ? 'danger':'primary'}
+        autohide appendToBody
+        position='top-center'
+        width={800}
+        offset={50}
+        delay={2000}
+      >
+        {responseMessage}
+      </MDBAlert>
     </>
   )
 }
-
+// 
+     
 export default Administrace;
