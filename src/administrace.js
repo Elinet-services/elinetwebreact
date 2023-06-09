@@ -14,12 +14,12 @@ import {
   MDBModalHeader,
   MDBModalTitle,
   MDBModalBody,
-  MDBModalFooter,
   MDBPopconfirm,
   MDBPopconfirmMessage,
   MDBAutocomplete,
   MDBSpinner,
-  MDBAlert
+  MDBAlert,
+  MDBBtnGroup, MDBRadio
 } from 'mdb-react-ui-kit';
 
 //import { MDBTreeTable, MDBTreeTableItem, MDBTreeTableHead, MDBTreeTableBody } from 'mdb-react-treetable';
@@ -36,12 +36,13 @@ function Administrace()
   const [imageThumbnailData, setImageThumbnailData] = useState('');     //  obrazek nahledu dokumentu
 
   const [documentTypeList, setDocumentTypeList] = useState([
+    {value: '', text: '' },
     {value: 'FP', text: 'Faktura přijatá', defaultSelected: false},
     {value: 'FV', text: 'Faktura vydaná', defaultSelected: false},
     {value: 'D',  text: 'Dokument', defaultSelected: false} ]
   );
-
   /*  SEZNAM DOKUMENTU NA DISKU */
+  const [documentListAll, setDocumentListAll] = useState({rows: []}); //  vsechna data kuli filtrovani Ne/Zarazene/Vse
   const [documentList, setDocumentList] = useState({
     columns:  [
       {label:'Soubor', field:'name', sort: true},
@@ -66,7 +67,6 @@ function Administrace()
     const loadData = () => {
       const formData = new FormData();
       formData.append("action", 'loadData');
-      
       processRequest(formData);
     };
 
@@ -81,7 +81,7 @@ function Administrace()
   //  preformatuje datum z DB k zobrazeni v prehledu
   function formatDate(aDate, aDocumentType) {
     let dateString = '';
-    if (aDocumentType !== 'D' && aDate != null) {
+    if (aDocumentType === 'D' && aDate != null) {
       const firstDot = aDate.indexOf('-');
       const lastDot  = aDate.lastIndexOf('-');
       //  kontrola
@@ -124,8 +124,6 @@ function Administrace()
   //  combobox documentType
   const onChangeDocumentFormType = (e) => {
     setDocumentFormValue({ ...documentFormValue, type: e.value });
-//    if (e.value != 'D')
-      //setDocumentFormValue({ ...documentFormValue, expireDate: '' });
   }
   //  combobox Partner
   const onChangeDocumentFormPartner = (value) => {
@@ -162,7 +160,7 @@ function Administrace()
     setError(false);
     setResponseMessage('');
 
-    formData.append("source", window.location.pathname.substring(1));    
+    formData.append("source", window.location.pathname.substring(1));
     
     fetch(url, {
       method: "POST",
@@ -209,12 +207,13 @@ function Administrace()
                 partnerName: row.partnerName,
                 orderName: row.orderName,
                 typeText: getDocumentTypeText(row.type),
-                issueDateText: formatDate(row.issueDate, ''),
+                issueDateText: formatDate(row.issueDate, 'D'),
                 expireDateText: formatDate(row.expireDate, row.type)
               }
             )
           })
           setDocumentList({...documentList, rows});
+          setDocumentListAll({...documentListAll, rows});
         }
         setLoading(false);
         if (responseData.message.length > 0 && formData.get('action') === 'submitForm')  //  zobrazit vysledek volani DB - responseMessage
@@ -231,11 +230,12 @@ function Administrace()
 
 //  -------------------------------------------------------------------------------
   //  odeslani formu do DB
-  function submitDocumentForm()
-  {    
+  function submitDocumentForm(e)
+  {
+    e.preventDefault();
     const formData = new FormData();
     formData.append("action", 'submitForm');
-    
+
     for (let key in documentFormValue) {
       formData.append(key, documentFormValue[key])
       console.log(key +' - '+ documentFormValue[key])
@@ -252,6 +252,17 @@ function Administrace()
     setImageThumbnailData('');
     processRequest(formData);
   }
+
+  //  -------------------------------------------------------------------------------
+  //  FILTROVANI Ne/Zarazene/Vse
+  const onChangeDocumentListFilter = (value) => {    
+    let rows = (documentListAll.rows.filter((item) => 
+        value === 'V' ||
+        (value === 'Z' && (item.type.length > 0 && item.issueDate.length > 0 && item.partnerName.length > 0 && item.orderName.length > 0 )) ||
+        (value === 'N' && (item.type.length === 0 || item.issueDate.length === 0 || item.partnerName.length === 0 || item.orderName.length === 0 )) 
+      ));
+    setDocumentList({...documentList, rows});
+  }
   
   //  -------------------------------------------------------------------------------
   //  H L A V N I   B L O K
@@ -264,6 +275,11 @@ function Administrace()
         <MDBCol>
           <MDBCard>
             <MDBCardBody>
+              <MDBBtnGroup shadow='2' className='mb-2'>
+                <MDBRadio btn btnColor='light' id='documentFilterN' name='documentFilter' value='N' label='Nezařazené' defaultChecked onChange={(e) => onChangeDocumentListFilter(e.target.value )}/>
+                <MDBRadio btn btnColor='light' id='documentFilterZ' name='documentFilter' value='Z' label='Zařazené' onChange={(e) => onChangeDocumentListFilter(e.target.value )}/>
+                <MDBRadio btn btnColor='light' id='documentFilterV' name='documentFilter' value='V' label='Vše' onChange={(e) => onChangeDocumentListFilter(e.target.value )}/>
+              </MDBBtnGroup>
               <MDBDatatable 
                 data={documentList} 
                 maxHeight='400px' 
@@ -307,124 +323,123 @@ function Administrace()
             <MDBRow>
               {/* 1. sloupec s daty */}
               <MDBCol md='3'>
-                  <form>
-                    <a href={'https://drive.google.com/file/d/'+ documentFormValue.fileId +'/view?usp=drivesdk'} target="_blank" rel="noreferrer" className='mb-3'>
-                      Dokument
-                    </a>
-                    <MDBSelect
-                      label='Typ'
-                      name="type"
-                      id="type"
-                      data={documentTypeList}
-                      className='mt-3 mb-3'
-                      onValueChange={(e) => onChangeDocumentFormType(e)}
-                    />
-                    <MDBInput
-                      label='Název'
-                      name='name'
-                      id='name'
-                      value={documentFormValue.name}
-                      className='mb-3'
-                      onChange={onChangeDocumentForm}
-                    />
-                    <MDBInput
-                      label='Datum vystavení'
-                      name='issueDate'
-                      id='issueDate'
-                      value={documentFormValue.issueDate}
-                      type='date'
-                      className='mb-3'
-                      onChange={onChangeDocumentForm}
-                    />
-                    {documentFormValue.type === 'D'? 
-                    <MDBInput
-                      label='Datum expirace'
+                <form onSubmit={(e) => submitDocumentForm(e)}>
+                  <a href={'https://drive.google.com/file/d/'+ documentFormValue.fileId +'/view?usp=drivesdk'} target="_blank" rel="noreferrer" className='mb-3'>
+                    Dokument
+                  </a>
+                  <MDBSelect label='Typ'
+                    data={documentTypeList}
+                    placeholder='Example placeholder'
+                    name="type"
+                    id="type"
+                    validation
+                    className='mt-3 mb-3'
+                    onValueChange={(e) => onChangeDocumentFormType(e)}
+                  />
+                  <MDBInput label='Název'
+                    value={documentFormValue.name}
+                    name='name'
+                    id='name'
+                    required
+                    className='mb-3'
+                    onChange={onChangeDocumentForm}
+                  />
+                  <MDBInput label='Datum vystavení'
+                    value={documentFormValue.issueDate}
+                    name='issueDate'
+                    id='issueDate'
+                    required
+                    type='date'
+                    className='mb-3'
+                    onChange={onChangeDocumentForm}
+                  />
+                  {documentFormValue.type === 'D'? 
+                    <MDBInput label='Datum expirace'
+                      value={documentFormValue.expireDate}
                       name='expireDate'
                       id='expireDate'
-                      value={documentFormValue.expireDate}
+                      required
                       type='date'
                       className='mb-3'
                       onChange={onChangeDocumentForm}
                     /> : ''}
-                    <MDBAutocomplete
-                        label='Klient'
-                        name='partner'
-                        id='partner'
-                        data={partnerData}
-                        displayValue={(row) => row.partnerName}
-                        value={documentFormValue.partnerName}
-                        onSearch={onSearchDocumentFormPartner}
-                        onChange={onChangeDocumentFormPartner}
-                        itemContent={(result) => (
-                          <div className='autocomplete-custom-item-content'>
-                            <div className='autocomplete-custom-item-title'>{result.partnerName}</div>
-                            <div className='autocomplete-custom-item-subtitle'>{result.description}</div>
-                          </div>)}
-                        className='mb-3'
-                        listHeight='250px'
-                        noResults='Klient nenalezen'
-                    />                    
-                    <MDBAutocomplete
-                        label='Zakázka'
-                        name='order'
-                        id='order'
-                        data={orderData}
-                        displayValue={(row) => row.orderName}
-                        value={documentFormValue.orderName}
-                        onSearch={onSearchDocumentFormOrder}
-                        onChange={onChangeDocumentFormOrder}
-                        itemContent={(result) => (
-                          <div className='autocomplete-custom-item-content'>
-                            <div className='autocomplete-custom-item-title'>{result.orderName}</div>
-                            <div className='autocomplete-custom-item-subtitle'>{result.description}</div>
-                          </div>)}
-                        className='mb-3'
-                        listHeight='250px'
-                        noResults='Zakázka nenalezena'
-                    />                    
-                    <MDBTextArea
-                      rows='4'
-                      label='Popis'
-                      name='description'
-                      id='description'
-                      value={documentFormValue.description}
-                      wrapperClass="mb-4"
+                  <MDBAutocomplete label='Klient'
+                      name='partner'
+                      id='partner'
+                      required
+                      data={partnerData}
+                      displayValue={(row) => row.partnerName}
+                      value={documentFormValue.partnerName}
+                      onSearch={onSearchDocumentFormPartner}
+                      onChange={onChangeDocumentFormPartner}
+                      itemContent={(result) => (
+                        <div className='autocomplete-custom-item-content'>
+                          <div className='autocomplete-custom-item-title'>{result.partnerName}</div>
+                          <div className='autocomplete-custom-item-subtitle'>{result.description}</div>
+                        </div>)}
                       className='mb-3'
-                      onChange={onChangeDocumentForm}
-                    />
-                  </form>
+                      listHeight='250px'
+                      noResults='Klient nenalezen'
+                  />
+                  <MDBAutocomplete label='Zakázka'
+                      name='order'
+                      id='order'
+                      required
+                      data={orderData}
+                      displayValue={(row) => row.orderName}
+                      value={documentFormValue.orderName}
+                      onSearch={onSearchDocumentFormOrder}
+                      onChange={onChangeDocumentFormOrder}
+                      itemContent={(result) => (
+                        <div className='autocomplete-custom-item-content'>
+                          <div className='autocomplete-custom-item-title'>{result.orderName}</div>
+                          <div className='autocomplete-custom-item-subtitle'>{result.description}</div>
+                        </div>)}
+                      className='mb-3'
+                      listHeight='250px'
+                      noResults='Zakázka nenalezena'
+                  />
+                  <MDBTextArea label='Popis'
+                    value={documentFormValue.description}
+                    name='description'
+                    id='description'
+                    rows='4'
+                    wrapperClass="mb-4"
+                    className='mb-3'
+                    onChange={onChangeDocumentForm}
+                  />
+                  {/* butonky */}
+                  <MDBRow>
+                    <MDBCol className="d-flex justify-content-end flex-wrap">
+                      <div className="m-1">
+                        <MDBPopconfirm
+                          color='warning'
+                          btnChildren={<div>Smazat&nbsp;&nbsp;<MDBIcon far icon='trash-alt'/></div>}
+                          cancelBtnText='NE'
+                          cancelBtnClasses='btn-secondary'
+                          confirmBtnText='Smazat'
+                          confirmBtnClasses='btn-warning'
+                          //onConfirm={() => {onClickDocumentDelete()}}
+                        >
+                          <MDBPopconfirmMessage icon={<MDBIcon far icon='trash-alt'/>}> Opravdu smazat dokument {documentFormValue.name}?</MDBPopconfirmMessage>
+                        </MDBPopconfirm>
+                      </div>
+                      <MDBBtn type="submit" className="m-1">
+                        Uložit
+                      </MDBBtn>
+                    </MDBCol>
+                  </MDBRow>
+                </form>
               </MDBCol>
-
-              {/* 2. sloupec s nahledem */}
+              {/* 2. sloupec s nahledem dokumentu */}
               <MDBCol>
-                <img src={`data:image/jpeg;base64,${imageThumbnailData}`} className='img-fluid shadow-4' alt={documentFormValue.name} />
+                {imageThumbnailData.length === 0 ? 
+                  <MDBSpinner role='status'/> :
+                  <img src={`data:image/jpeg;base64,${imageThumbnailData}`} className='img-fluid shadow-4' alt={documentFormValue.name} />
+                }
               </MDBCol>
             </MDBRow>
           </MDBModalBody>
-          <MDBModalFooter>
-            <MDBBtn color='secondary' 
-              onClick={() => {
-                  toggleShowDocumentDetail();
-                }
-              }
-            >
-              Zpět
-            </MDBBtn>
-            <MDBPopconfirm
-              color='warning'
-              btnChildren={<div>Smazat&nbsp;&nbsp;<MDBIcon far icon='trash-alt'/></div>}
-              cancelBtnText='NE'
-              cancelBtnClasses='btn-secondary'
-              confirmBtnText='Smazat'
-              confirmBtnClasses='btn-warning'
-              //onConfirm={() => {onClickDocumentDelete()}}
-            >
-              <MDBPopconfirmMessage icon={<MDBIcon far icon='trash-alt'/>}> Opravdu smazat dokument {documentFormValue.name}?</MDBPopconfirmMessage>
-            </MDBPopconfirm>
-            <MDBBtn type="submit" 
-              onClick={submitDocumentForm}
-            >Uložit</MDBBtn>
-          </MDBModalFooter>
         </MDBModalContent>
       </MDBModalDialog>
     </MDBModal>
@@ -461,5 +476,5 @@ function Administrace()
   )
 }
 // 
-     
+
 export default Administrace;
