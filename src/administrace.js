@@ -34,6 +34,7 @@ function Administrace()
   const [responseMessage, setResponseMessage] = useState(''); //  textova zprava volani do DB
   const [showDocumentDetail, setShowDocumentDetail] = useState(false);  //  priznak, zobrazit detail dokumentu
   const [imageThumbnailData, setImageThumbnailData] = useState('');     //  obrazek nahledu dokumentu
+  const [documentListFilter, setDocumentListFilter] = useState('N');    //  vyber filtru Ne/Zarazene/Vse
 
   const [documentTypeList, setDocumentTypeList] = useState([
     {value: '', text: '' },
@@ -115,7 +116,7 @@ function Administrace()
   const [documentFormValue, setDocumentFormValue] = useState({
     fileId: '', type: '', name: '', issueDate: '', expireDate: '', 
     //idPartner: '', idOrder: '', 
-    description: '', partnerName:'', orderName: ''
+    description: '', partnerName:'', orderName: '', origName: ''
   });
   //  normalni INPUT
   const onChangeDocumentForm = (e) => {
@@ -144,17 +145,15 @@ function Administrace()
   const onChangeDocumentFormOrder = (value) => {
     setDocumentFormValue({ ...documentFormValue, orderName: value });
   }
-  const onSearchDocumentFormOrder = (value) => {    
-    let orders = (orderDataAll.filter((item) => item.orderName.toLowerCase().startsWith(value.toLowerCase())));
-    setOrderData(orders);
+  const onSearchDocumentFormOrder = (value) => {
+    setOrderData(orderDataAll.filter((item) => item.orderName.toLowerCase().startsWith(value.toLowerCase())));
   }
 
   //  -------------------------------------------------------------------------------
   //  odesle data do DB
   function processRequest(formData)
   {
-    //const url = "https://script.google.com/macros/s/AKfycbxSRRBE6BrXcSDUenhUY33C6UPkLaX9Ps9CAGYA5VwEllrq95LP0nROCn_a_K5TXtVNhA/exec";
-    const url = "https://script.google.com/macros/s/AKfycbzjthLfYNaLHfNd57DSnF_NZ2v-JMwmBRJnPiFhYeCcbJ5o5HCCZOoLhaQmsnLfid4MAA/exec";
+    const url = "https://script.google.com/macros/s/AKfycbxOyHw6GiImKkBjPgLFKfI1JoMQ78IhY0ilZtYOgFJN8aIGSeK8dfTTMLYZtepgVP5gMw/exec";
     if (formData.get('action') !== 'getThumbnailData')
       setLoading(true);
     setError(false);
@@ -204,19 +203,19 @@ function Administrace()
                 issueDate: row.issueDate,
                 expireDate: row.expireDate,
                 description: row.description,
-                partnerName: row.partnerName,
-                orderName: row.orderName,
+                partnerName: (row.partnerName === undefined ? '' : row.partnerName),
+                orderName: (row.orderName === undefined ? '' : row.orderName),
                 typeText: getDocumentTypeText(row.type),
                 issueDateText: formatDate(row.issueDate, 'D'),
                 expireDateText: formatDate(row.expireDate, row.type)
               }
             )
           })
-          setDocumentList({...documentList, rows});
           setDocumentListAll({...documentListAll, rows});
+          filterDocumentList(documentListFilter, rows);
         }
         setLoading(false);
-        if (responseData.message.length > 0 && formData.get('action') === 'submitForm')  //  zobrazit vysledek volani DB - responseMessage
+        if (responseData.message.length > 0 /*&& formData.get('action') === 'submitForm'*/)  //  zobrazit vysledek volani DB - responseMessage
           submitAlertMessage.current.click();
       })
       .catch((e) => {
@@ -252,16 +251,29 @@ function Administrace()
     setImageThumbnailData('');
     processRequest(formData);
   }
-
+  //  odstraneni souboru
+  function onClickDocumentDelete ()
+  {
+    const formData = new FormData();
+    formData.append("action", 'deleteFile');
+    formData.append("fileId", documentFormValue.fileId);
+    toggleShowDocumentDetail();
+    processRequest(formData);
+  }
   //  -------------------------------------------------------------------------------
   //  FILTROVANI Ne/Zarazene/Vse
-  const onChangeDocumentListFilter = (value) => {    
-    let rows = (documentListAll.rows.filter((item) => 
+  function filterDocumentList(value, documentRows)
+  {
+    let rows = (documentRows.filter((item) => 
         value === 'V' ||
         (value === 'Z' && (item.type.length > 0 && item.issueDate.length > 0 && item.partnerName.length > 0 && item.orderName.length > 0 )) ||
         (value === 'N' && (item.type.length === 0 || item.issueDate.length === 0 || item.partnerName.length === 0 || item.orderName.length === 0 )) 
       ));
     setDocumentList({...documentList, rows});
+  }
+  function onChangeDocumentListFilter (value) {
+    setDocumentListFilter(value);
+    filterDocumentList(value, documentListAll.rows)
   }
   
   //  -------------------------------------------------------------------------------
@@ -276,9 +288,9 @@ function Administrace()
           <MDBCard>
             <MDBCardBody>
               <MDBBtnGroup shadow='2' className='mb-2'>
-                <MDBRadio btn btnColor='light' id='documentFilterN' name='documentFilter' value='N' label='Nezařazené' defaultChecked onChange={(e) => onChangeDocumentListFilter(e.target.value )}/>
-                <MDBRadio btn btnColor='light' id='documentFilterZ' name='documentFilter' value='Z' label='Zařazené' onChange={(e) => onChangeDocumentListFilter(e.target.value )}/>
-                <MDBRadio btn btnColor='light' id='documentFilterV' name='documentFilter' value='V' label='Vše' onChange={(e) => onChangeDocumentListFilter(e.target.value )}/>
+                <MDBRadio btn btnColor='light' id='documentFilterN' name='documentFilter' value='N' label='Nezařazené' defaultChecked onChange={(e) => onChangeDocumentListFilter(e.target.value)}/>
+                <MDBRadio btn btnColor='light' id='documentFilterZ' name='documentFilter' value='Z' label='Zařazené' onChange={(e) => onChangeDocumentListFilter(e.target.value)}/>
+                <MDBRadio btn btnColor='light' id='documentFilterV' name='documentFilter' value='V' label='Vše' onChange={(e) => onChangeDocumentListFilter(e.target.value)}/>
               </MDBBtnGroup>
               <MDBDatatable 
                 data={documentList} 
@@ -292,8 +304,9 @@ function Administrace()
                 fixedHeader search striped sm
                 onRowClick={(row) => {
                     setDocumentFormValue(
-                      {fileId: row.fileId, type: row.type, name: row.name, issueDate: row.issueDate, expireDate: row.expireDate,
-                        description: row.description, partnerName: row.partnerName, orderName: row.orderName}
+                      { fileId: row.fileId, type: row.type, name: row.name.substring(0, row.name.lastIndexOf('.')), 
+                        issueDate: row.issueDate, expireDate: row.expireDate,
+                        description: row.description, partnerName: row.partnerName, orderName: row.orderName, origName: row.name}
                     );
                     fillDocumentTypeList(row.type);
                     onSearchDocumentFormPartner(row.partnerName);
@@ -313,7 +326,7 @@ function Administrace()
       <MDBModalDialog size="xl">
         <MDBModalContent>
           <MDBModalHeader>
-            <MDBModalTitle>{documentFormValue.name}</MDBModalTitle>
+            <MDBModalTitle>{documentFormValue.origName}</MDBModalTitle>
             <MDBBtn
               type='button' className='btn-close' color='none'
               onClick={toggleShowDocumentDetail}
@@ -412,16 +425,14 @@ function Administrace()
                   <MDBRow>
                     <MDBCol className="d-flex justify-content-end flex-wrap">
                       <div className="m-1">
-                        <MDBPopconfirm
-                          color='warning'
-                          btnChildren={<div>Smazat&nbsp;&nbsp;<MDBIcon far icon='trash-alt'/></div>}
-                          cancelBtnText='NE'
-                          cancelBtnClasses='btn-secondary'
-                          confirmBtnText='Smazat'
-                          confirmBtnClasses='btn-warning'
-                          //onConfirm={() => {onClickDocumentDelete()}}
+                        <MDBPopconfirm btnChildren={<div>Smazat&nbsp;&nbsp;<MDBIcon far icon='trash-alt'/></div>}
+                          type='button' color='warning'
+                          cancelBtnText='NE' cancelBtnClasses='btn-secondary'
+                          confirmBtnText='Smazat' confirmBtnClasses='btn-warning'
+                          placement='top'
+                          onConfirm={() => {onClickDocumentDelete()}}
                         >
-                          <MDBPopconfirmMessage icon={<MDBIcon far icon='trash-alt'/>}> Opravdu smazat dokument {documentFormValue.name}?</MDBPopconfirmMessage>
+                          <MDBPopconfirmMessage icon={<MDBIcon far icon='trash-alt'/>}> Opravdu smazat dokument {documentFormValue.origName}?</MDBPopconfirmMessage>
                         </MDBPopconfirm>
                       </div>
                       <MDBBtn type="submit" className="m-1">
