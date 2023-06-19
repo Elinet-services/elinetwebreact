@@ -392,7 +392,7 @@ function Administrace()
                         </div>)}
                       className='mb-3'
                       listHeight='250px'
-                      noResults='Klient nenalezen'
+                      noResults={<div className='text-warning'>Firma nenalezena, zadáváte novou</div>}
                   />
                   <MDBAutocomplete label='Zakázka'
                       name='order'
@@ -410,7 +410,7 @@ function Administrace()
                         </div>)}
                       className='mb-3'
                       listHeight='250px'
-                      noResults='Zakázka nenalezena'
+                      noResults={<div className='text-warning'>Zakázka nenalezena, zadáváte novou</div>}
                   />
                   <MDBTextArea label='Popis'
                     value={documentFormValue.description}
