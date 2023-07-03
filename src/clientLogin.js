@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { MDBInput, MDBBtn, MDBCard, MDBCardBody, MDBCardText } from "mdb-react-ui-kit"
 
 import { sha256 } from "node-forge";
+import connection from './connection.js';
 
 function ClientLogin() {
-    const [submited, setSubmited] = useState(false)
+    const [logged, setLogged] = useState(false)
     const [error, setError] = useState(false)
     const [responseMessage, setResponseMessage] = useState()
     const [formValue, setFormValue] = useState({
@@ -12,7 +13,17 @@ function ClientLogin() {
         password: ""
     });
 
+    useEffect(() => {
+      //connection.resetCookies();
+      //connection.setCookie('operatorLevel', 'N', { path: '/'});
+      //cookies.set('userName', '', { path: '/'});
+      //cookies.set('partnerName', '', { path: '/'});
+    }, []);  
+
     const onChange = (e) => {
+      //var cookie = require('cookie');
+      //cookie.serialize('token','abcd123d',{expires: new Date()});
+
         setFormValue({ ...formValue, [e.target.name]: e.target.value })
         if (e.target.name === 'password') {
             if (e.target.value.length === 0)
@@ -28,7 +39,6 @@ function ClientLogin() {
     {
       e.preventDefault();
 
-      const url = "https://script.google.com/macros/s/AKfycbyHpBxU8hmMBau8A_l7sOCEaMaE7VszFDeIXYE-03n83r-q_FAREIZSEeNmstK5nL-vTw/exec";
       const formData = new FormData(document.getElementById("loginForm"));
       
       const sha = sha256.create().update(formData.get("email").toLowerCase() + formData.get("password"));
@@ -36,7 +46,7 @@ function ClientLogin() {
       formData.set("password", sha.digest().toHex());
       formData.append("source", 'login');
 
-      fetch(url, {
+      fetch(connection.getConnectionUrl(), {
         method: "POST",
         body: formData,
       })
@@ -52,13 +62,14 @@ function ClientLogin() {
           } else {
             setFormValue({ email: "", password: ""})
             document.getElementById('loginForm').reset();
-            setSubmited(true) //  nastavime odeslano
+            setLogged(true) //  nastavime prihlaseno
             return response.json()
           }
         })
         .then((responseData) => {
           console.log(responseData.result)
-          setResponseMessage(responseData.result)
+          setResponseMessage(responseData.message)
+          connection.setCookies(responseData.adminData.connection);
         })
         .catch((e) => {
           console.log(e.message)
@@ -75,7 +86,7 @@ function ClientLogin() {
             {responseMessage}
           </p>
         )
-    } else if (submited) {
+    } else if (logged) {
         return (
           <section className="d-flex justify-content-center">
             <MDBCard>
@@ -100,7 +111,7 @@ function ClientLogin() {
                         type="email"
                         wrapperClass="mb-4"
                         label="Email"
-                        required
+                        required autoComplete="email"
                     />
                     <MDBInput
                         name="password"
@@ -110,7 +121,7 @@ function ClientLogin() {
                         type="password"
                         wrapperClass="mb-4"
                         label="Heslo (min 8 znaků)"
-                        required
+                        required autoComplete="current-password"
                     />
             
                     <MDBBtn type="submit" className="mb-4" block>

@@ -23,6 +23,7 @@ import Administrace from "./administrace"
 import NoPage from "./NoPage"
 
 export default function RoutePage() {
+  
   return (
     <MDBContainer>
       <BrowserRouter>
@@ -40,8 +41,9 @@ export default function RoutePage() {
             <Route path="registerDone" element={<RegisterPageDone />} />
             
             <Route path="login" element={<Login />} />
-            <Route path="forgot" element={<Forgot />} />
+            <Route path="forgot" element={<Forgot />} />           
             <Route path="administrace" element={<Administrace />} />
+            
 
             <Route path="reset/:token" element={<ResetPassword />} />
             <Route path="*" element={<NoPage />} />

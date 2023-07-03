@@ -3,6 +3,7 @@ import { MDBInput, MDBBtn, MDBCard, MDBCardBody, MDBCardText } from "mdb-react-u
 import { useParams } from "react-router-dom";
 
 import { sha256 } from "node-forge";
+import connection from './connection.js';
 
 function ClientReset() {
     let { token } = useParams();
@@ -15,7 +16,6 @@ function ClientReset() {
         rePassword: ""
     });
 
-    console.log(1111);
     console.log(token);
 
     const onChange = (e) => {
@@ -41,7 +41,6 @@ function ClientReset() {
     function Submit(e)
     {
       e.preventDefault();
-      const url = "https://script.google.com/macros/s/AKfycbyHpBxU8hmMBau8A_l7sOCEaMaE7VszFDeIXYE-03n83r-q_FAREIZSEeNmstK5nL-vTw/exec";
 
       const formData = new FormData(document.getElementById("resetForm"));
       //  token = token + g + hexEncode(email)
@@ -52,7 +51,7 @@ function ClientReset() {
       formData.append("token", token.substring(0, token.indexOf('g')));
       formData.append("source", 'resetPassword');
 
-      fetch(url, {
+      fetch(connection.getConnectionUrl(), {
         method: "POST",
         body: formData,
       })

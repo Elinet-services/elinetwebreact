@@ -6,6 +6,10 @@ import {
   MDBNavbarItem,
   MDBNavbarLink,
   MDBNavbarToggler,
+  MDBDropdown,
+  MDBDropdownToggle,
+  MDBDropdownMenu,
+  MDBDropdownItem,
   MDBContainer,
   MDBIcon,
   MDBCollapse,
@@ -14,13 +18,41 @@ import {
   MDBRow,
   MDBCol,
 } from "mdb-react-ui-kit"
+import connection from './connection.js';
+
 
 function MainMenu() {
-  const [showBasic, setShowBasic] = useState(false)
+  const [showBasic, setShowBasic] = useState(false);
 
   function getActiveMenu(aMenuItem) {
     if (window.location.pathname === "/" + aMenuItem) return "active px-3"
     else return "px-3"
+  }
+
+  function renderUserInfo()
+  {
+    return (
+      <MDBDropdownItem>
+        <MDBContainer className="pe-5">
+          <MDBRow>
+            <MDBCol size='6'>
+              Uživatel:
+            </MDBCol>
+            <MDBCol size='6' className="text-nowrap pe-5">
+              {connection.getUserName()}
+            </MDBCol>
+          </MDBRow>
+          <MDBRow>
+            <MDBCol size='6'>
+              Partner:
+            </MDBCol>
+            <MDBCol size='6' className="text-nowrap pe-5" >
+              {connection.getPartnerName()}
+            </MDBCol>
+          </MDBRow>
+        </MDBContainer>                          
+      </MDBDropdownItem>
+    )
   }
 
   return (
@@ -86,15 +118,37 @@ function MainMenu() {
                   Kontakt
                 </MDBNavbarLink>
               </MDBNavbarItem>
+              
               <MDBNavbarItem>
-                <MDBNavbarLink href="/login" className="px-3">
-                  Přihlášení
-                </MDBNavbarLink>
-              </MDBNavbarItem>
-              <MDBNavbarItem>
-                <MDBNavbarLink href="/administrace" className="px-3">
-                  Administrace
-                </MDBNavbarLink>
+                {connection.getOperatorLevel() === 'N' ? 
+                  <MDBNavbarLink href="/login" className="px-3">
+                    Přihlášení
+                  </MDBNavbarLink>
+                :
+                  <MDBDropdown>
+                    <MDBDropdownToggle tag='a' className='nav-link' role='button'>
+                      Uživatel
+                    </MDBDropdownToggle>
+                    {connection.getOperatorLevel() === 'A' ? 
+                      <MDBDropdownMenu>
+                        {renderUserInfo()}
+                        <MDBDropdownItem divider/>
+                        <MDBDropdownItem link href="/administrace">Administrace</MDBDropdownItem>
+                        <MDBDropdownItem link href="/register">Registrace</MDBDropdownItem>
+                        <MDBDropdownItem divider/>
+                        <MDBDropdownItem link href="/logout">Odhlášení</MDBDropdownItem>
+                      </MDBDropdownMenu>
+                    : 
+                      <MDBDropdownMenu>
+                        {renderUserInfo()}                        
+                        <MDBDropdownItem divider/>
+                        <MDBDropdownItem link href="/solar">Seznam zakázek</MDBDropdownItem>
+                        <MDBDropdownItem divider/>
+                        <MDBDropdownItem link href="/logout">Odhlášení</MDBDropdownItem>
+                      </MDBDropdownMenu>
+                    }
+                  </MDBDropdown>
+                }
               </MDBNavbarItem>
             </MDBNavbarNav>
           </MDBCollapse>

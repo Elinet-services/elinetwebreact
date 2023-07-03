@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { MDBCol, MDBInput, MDBTextArea, MDBBtn } from "mdb-react-ui-kit"
 import { sha256 } from "node-forge";
+import connection from './connection.js';
 
 function ContactForm() {
   const [submited, setSubmited] = useState(false)
@@ -57,11 +58,7 @@ function ContactForm() {
       //formData.append('ipAddress', ...)
       setSubmited(true) //  nastavime odeslano
 
-      const url = "https://script.google.com/macros/s/AKfycbyHpBxU8hmMBau8A_l7sOCEaMaE7VszFDeIXYE-03n83r-q_FAREIZSEeNmstK5nL-vTw/exec";
-      //const url = 'https://httpstat.us/401';
-      //const url = 'https://script.google.com/macros/s/AKfycbz3xsrZgWErwE8RcO0iOb9rCgthBDDBejk3EZTfts-2HUDiKXSIHGTaBUcbSYlNmrktpw/exec';
-
-      fetch(url, {
+      fetch(connection.getConnectionUrl(), {
         method: "POST",
         body: formData,
       })
