@@ -102,7 +102,7 @@ function mainPage() {
               společnosti jejichž součástí je mimo jiné i plně funkční náhrada
               Microsoft Office včetně velkých sdílených disků.
             </li>
-            <li>Mikrotik a Cisco pro sítě a wifi připojení</li>
+            <li>Mikrotik a Cisco systémy pro sítě a wifi připojení</li>
             <li>
               Vývoj aplikací nad MS Excel a Google Spreadsheet prostřednictvím
               vývojového nástroje Appsheet.{" "}
