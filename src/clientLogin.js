@@ -14,7 +14,7 @@ function ClientLogin() {
     });
 
     useEffect(() => {
-      //connection.resetCookies();
+      connection.resetCookies();
       //connection.setCookie('operatorLevel', 'N', { path: '/'});
       //cookies.set('userName', '', { path: '/'});
       //cookies.set('partnerName', '', { path: '/'});
