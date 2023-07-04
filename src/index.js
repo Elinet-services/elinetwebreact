@@ -16,9 +16,11 @@ import RegisterPage from "./clientRegister"
 import RegisterPageDone from "./clientRegisterDone"
 
 import Login from "./clientLogin"
+import Logout from "./logout"
 import Forgot from "./clientForgot"
 import ResetPassword from "./clientReset"
 import Administrace from "./administrace"
+import OrderList from "./orderlist"
 
 import NoPage from "./NoPage"
 
@@ -36,14 +38,14 @@ export default function RoutePage() {
             <Route path="about" element={<NoPage />} />
             <Route path="contacts" element={<NoPage />} />
 
-
             <Route path="register" element={<RegisterPage />} />
             <Route path="registerDone" element={<RegisterPageDone />} />
-            
+
             <Route path="login" element={<Login />} />
+            <Route path="logout" element={<Logout />} />
             <Route path="forgot" element={<Forgot />} />           
             <Route path="administrace" element={<Administrace />} />
-            
+            <Route path="orderlist" element={<OrderList />} />
 
             <Route path="reset/:token" element={<ResetPassword />} />
             <Route path="*" element={<NoPage />} />

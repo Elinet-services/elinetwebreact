@@ -55,7 +55,6 @@ function ContactForm() {
         console.log(pair[0] +', '+ pair[1]);
       } */
       console.log(formData);
-      //formData.append('ipAddress', ...)
       setSubmited(true) //  nastavime odeslano
 
       fetch(connection.getConnectionUrl(), {

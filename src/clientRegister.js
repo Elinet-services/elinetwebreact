@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MDBInput, MDBBtn, MDBCard, MDBCardBody, MDBCardText } from "mdb-react-ui-kit"
-
 import { sha256 } from "node-forge";
+import connection from './connection.js';
 
 function ClientRegister()
 {
@@ -39,16 +39,15 @@ function ClientRegister()
     function Submit(e)
     {
       e.preventDefault();
-      const url = "https://script.google.com/macros/s/AKfycbyHpBxU8hmMBau8A_l7sOCEaMaE7VszFDeIXYE-03n83r-q_FAREIZSEeNmstK5nL-vTw/exec";
-
       const formData = new FormData(document.getElementById("registerForm"));      
       const sha = sha256.create().update(formData.get("email").toLowerCase() + formData.get("password"));
 
       formData.delete("rePassword");
       formData.set("password", sha.digest().toHex());
       formData.append("source", 'register');
+      formData.append("token", connection.getToken());
 
-      fetch(url, {
+      fetch(connection.getConnectionUrl(), {
         method: "POST",
         body: formData,
       })

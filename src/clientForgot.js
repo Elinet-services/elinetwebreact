@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MDBInput, MDBBtn, MDBCard, MDBCardBody, MDBCardText } from "mdb-react-ui-kit"
+import connection from './connection.js';
 
 function ClientForgot() {
     const [submited, setSubmited] = useState(false)
@@ -16,13 +17,12 @@ function ClientForgot() {
     function Submit(e)
     {
       e.preventDefault();
-      const url = "https://script.google.com/macros/s/AKfycbyHpBxU8hmMBau8A_l7sOCEaMaE7VszFDeIXYE-03n83r-q_FAREIZSEeNmstK5nL-vTw/exec";
 
       const formData = new FormData(document.getElementById("forgotForm"));      
       formData.set("email", formData.get("email").toLowerCase());
       formData.append("source", 'forgot');
 
-      fetch(url, {
+      fetch(connection.getConnectionUrl(), {
         method: "POST",
         body: formData,
       })
@@ -86,7 +86,7 @@ function ClientForgot() {
                         type="email"
                         wrapperClass="mb-4"
                         label="Email"
-                        required
+                        required autoComplete="email"
                     />
             
                     <MDBBtn type="submit" className="mb-4" block>

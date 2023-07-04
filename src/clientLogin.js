@@ -70,6 +70,9 @@ function ClientLogin() {
           console.log(responseData.result)
           setResponseMessage(responseData.message)
           connection.setCookies(responseData.adminData.connection);
+          setTimeout(() => {
+            window.location.replace('/');
+          }, 2000);
         })
         .catch((e) => {
           console.log(e.message)

@@ -1,17 +1,21 @@
 exports.getConnectionUrl = getConnectionUrl;
+exports.getToken         = getToken;
 exports.getOperatorLevel = getOperatorLevel;
 exports.getUserName     = getUserName;
 exports.getPartnerName  = getPartnerName;
-exports.setCookies = setCookies;
-exports.resetCookies = resetCookies;
+exports.setCookies      = setCookies;
+exports.resetCookies    = resetCookies;
 
-const url = "https://script.google.com/macros/s/AKfycbyEpGMXM4xm46fbV6u3tPUCSFCfOhRrxiAodUPuL_fCsYsTcNO8QM8656gCqlCzJhxtZw/exec";
-const cookieTimeout = 30;   //  platnost cookie v minutach
+const url = "https://script.google.com/macros/s/AKfycbzoNHGQa36wNcDcA0Dn4g92T0LlrgaC56xJPDIFnYKXElnkRzVpdkaXtf7eKWfClwF-TA/exec";
+const cookieTimeout = 60;   //  platnost cookie v minutach
 
 function getConnectionUrl () {
     return url;
 }
 
+function getToken() {
+    return getCookie('token');
+}
 function getOperatorLevel() {   //  N - none; U - User; A - Admin
     let operatorLevel = getCookie('operatorLevel');
     if (operatorLevel.length === 0)
@@ -51,18 +55,18 @@ function getCookie(aName)
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
         let cookie = cookies[i];
-        while (cookie.charAt(0) == ' ') {
+        while (cookie.charAt(0) === ' ') {
             cookie = cookie.substring(1);
         }
-        if (cookie.indexOf(name) == 0) {
+        if (cookie.indexOf(name) === 0) {
             return cookie.substring(name.length, cookie.length);
         }
     }
     return "";
 }
+
 function deleteCookie(aName)
 {
     const expireDate = new Date(0);
     document.cookie = aName +"=;expires="+ expireDate.toUTCString() +";path=/";
 }
-

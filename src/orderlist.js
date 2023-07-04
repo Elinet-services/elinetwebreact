@@ -26,7 +26,7 @@ import connection from './connection.js';
 //import "mdb-react-treetable/dist/css/treetable.min.css"
 
 
-function Administrace()
+function OrderList()
 {
   const submitAlertMessage = useRef(null);        //  zobrazeni responseMessage v MDBAlertu po volani DB
   const [loading, setLoading] = useState(false);  //  volani do DB
@@ -34,7 +34,6 @@ function Administrace()
   const [responseMessage, setResponseMessage] = useState(''); //  textova zprava volani do DB
   const [showDocumentDetail, setShowDocumentDetail] = useState(false);  //  priznak, zobrazit detail dokumentu
   const [imageThumbnailData, setImageThumbnailData] = useState('');     //  obrazek nahledu dokumentu
-  const [documentListFilter, setDocumentListFilter] = useState('N');    //  vyber filtru Ne/Zarazene/Vse
 
   const [documentTypeList, setDocumentTypeList] = useState([
     {value: '', text: '' },
@@ -118,37 +117,7 @@ function Administrace()
     //idPartner: '', idOrder: '', 
     description: '', partnerName:'', orderName: '', origName: ''
   });
-  //  normalni INPUT
-  const onChangeDocumentForm = (e) => {
-    setDocumentFormValue({ ...documentFormValue, [e.target.name]: e.target.value })
-  }
-  //  combobox documentType
-  const onChangeDocumentFormType = (e) => {
-    setDocumentFormValue({ ...documentFormValue, type: e.value });
-  }
-  //  combobox Partner
-  const onChangeDocumentFormPartner = (value) => {
-    setDocumentFormValue({ ...documentFormValue, partnerName: value });
-  }
-  const onSearchDocumentFormPartner = (value) => {
-    let partners = (partnerDataAll.filter((item) => item.partnerName.toLowerCase().startsWith(value.toLowerCase())));
-    setPartnerData(partners);
-    if (partners.length === 1) { //  pokud mame prave jeden partner filtrovany
-      setOrderDataAll(partners[0].orderList);
-      setOrderData(partners[0].orderList);
-    } else {
-      setOrderDataAll([]);
-      setOrderData([]);
-    }
-  }
-  //  combobox Zakazka
-  const onChangeDocumentFormOrder = (value) => {
-    setDocumentFormValue({ ...documentFormValue, orderName: value });
-  }
-  const onSearchDocumentFormOrder = (value) => {
-    setOrderData(orderDataAll.filter((item) => item.orderName.toLowerCase().startsWith(value.toLowerCase())));
-  }
-
+  
   //  -------------------------------------------------------------------------------
   //  odesle data do DB
   function processRequest(formData)
@@ -159,7 +128,6 @@ function Administrace()
     setResponseMessage('');
 
     formData.append("source", window.location.pathname.substring(1));
-    formData.append("token", connection.getToken());
     
     fetch(connection.getConnectionUrl(), {
       method: "POST",
@@ -178,7 +146,7 @@ function Administrace()
         }
       })
       .then((responseData) => {
-        //  console.log(responseData);
+        //  console.log(responseData)
         setResponseMessage(responseData.message);
 
         if (formData.get('action') === 'getThumbnailData'){  //zpracuj nahled dokumentu
@@ -191,32 +159,27 @@ function Administrace()
           setImageThumbnailData( btoa(imageContent) );
         }
         else {
-          if (responseData.adminData.partnerList) {
-            setPartnerDataAll(responseData.adminData.partnerList);
-            setPartnerData(responseData.adminData.partnerList);
-          }
+          setPartnerDataAll(responseData.adminData.partnerList);
+          setPartnerData(responseData.adminData.partnerList);
           let rows = [];
           //  naplnit seznam dokumentu
-          if (responseData.adminData.documentList) {
-            responseData.adminData.documentList.forEach(function (row){
-              rows.push( {
-                  fileId: row.fileId,
-                  type: row.type, 
-                  name: row.name, 
-                  issueDate: row.issueDate,
-                  expireDate: row.expireDate,
-                  description: row.description,
-                  partnerName: (row.partnerName === undefined ? '' : row.partnerName),
-                  orderName: (row.orderName === undefined ? '' : row.orderName),
-                  typeText: getDocumentTypeText(row.type),
-                  issueDateText: formatDate(row.issueDate, 'D'),
-                  expireDateText: formatDate(row.expireDate, row.type)
-                }
-              )
-            })
-          }
+          responseData.adminData.documentList.forEach(function (row){
+            rows.push( {
+                fileId: row.fileId,
+                type: row.type, 
+                name: row.name, 
+                issueDate: row.issueDate,
+                expireDate: row.expireDate,
+                description: row.description,
+                partnerName: (row.partnerName === undefined ? '' : row.partnerName),
+                orderName: (row.orderName === undefined ? '' : row.orderName),
+                typeText: getDocumentTypeText(row.type),
+                issueDateText: formatDate(row.issueDate, 'D'),
+                expireDateText: formatDate(row.expireDate, row.type)
+              }
+            )
+          })
           setDocumentListAll({...documentListAll, rows});
-          filterDocumentList(documentListFilter, rows);
         }
         setLoading(false);
         if (responseData.message.length > 0 /*&& formData.get('action') === 'submitForm'*/)  //  zobrazit vysledek volani DB - responseMessage
@@ -232,20 +195,6 @@ function Administrace()
   }
 
 //  -------------------------------------------------------------------------------
-  //  odeslani formu do DB
-  function submitDocumentForm(e)
-  {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("action", 'submitForm');
-
-    for (let key in documentFormValue) {
-      formData.append(key, documentFormValue[key])
-      console.log(key +' - '+ documentFormValue[key])
-    }
-    toggleShowDocumentDetail();
-    processRequest(formData);
-  }
   //  nacteni nahledu dokumentu
   function getThumbnailData(fileId)
   {
@@ -254,30 +203,6 @@ function Administrace()
     formData.append("fileId", fileId);
     setImageThumbnailData('');
     processRequest(formData);
-  }
-  //  odstraneni souboru
-  function onClickDocumentDelete ()
-  {
-    const formData = new FormData();
-    formData.append("action", 'deleteFile');
-    formData.append("fileId", documentFormValue.fileId);
-    toggleShowDocumentDetail();
-    processRequest(formData);
-  }
-  //  -------------------------------------------------------------------------------
-  //  FILTROVANI Ne/Zarazene/Vse
-  function filterDocumentList(value, documentRows)
-  {
-    let rows = (documentRows.filter((item) => 
-        value === 'V' ||
-        (value === 'Z' && (item.type.length > 0 && item.issueDate.length > 0 && item.partnerName.length > 0 && item.orderName.length > 0 )) ||
-        (value === 'N' && (item.type.length === 0 || item.issueDate.length === 0 || item.partnerName.length === 0 || item.orderName.length === 0 )) 
-      ));
-    setDocumentList({...documentList, rows});
-  }
-  function onChangeDocumentListFilter (value) {
-    setDocumentListFilter(value);
-    filterDocumentList(value, documentListAll.rows)
   }
   
   //  -------------------------------------------------------------------------------
@@ -291,11 +216,6 @@ function Administrace()
         <MDBCol>
           <MDBCard>
             <MDBCardBody>
-              <MDBBtnGroup shadow='2' className='mb-2'>
-                <MDBRadio btn btnColor='light' id='documentFilterN' name='documentFilter' value='N' label='Nezařazené' defaultChecked onChange={(e) => onChangeDocumentListFilter(e.target.value)}/>
-                <MDBRadio btn btnColor='light' id='documentFilterZ' name='documentFilter' value='Z' label='Zařazené' onChange={(e) => onChangeDocumentListFilter(e.target.value)}/>
-                <MDBRadio btn btnColor='light' id='documentFilterV' name='documentFilter' value='V' label='Vše' onChange={(e) => onChangeDocumentListFilter(e.target.value)}/>
-              </MDBBtnGroup>
               <MDBDatatable 
                 data={documentList} 
                 maxHeight='400px' 
@@ -313,9 +233,6 @@ function Administrace()
                         description: row.description, partnerName: row.partnerName, orderName: row.orderName, origName: row.name}
                     );
                     fillDocumentTypeList(row.type);
-                    onSearchDocumentFormPartner(row.partnerName);
-                    getThumbnailData(row.fileId);
-                    toggleShowDocumentDetail();
                   }
                 }
               />
@@ -332,15 +249,13 @@ function Administrace()
           <MDBModalHeader>
             <MDBModalTitle>{documentFormValue.origName}</MDBModalTitle>
             <MDBBtn
-              type='button' className='btn-close' color='none'
-              onClick={toggleShowDocumentDetail}
             ></MDBBtn>
           </MDBModalHeader>
           <MDBModalBody>
             <MDBRow>
               {/* 1. sloupec s daty */}
               <MDBCol md='3'>
-                <form onSubmit={(e) => submitDocumentForm(e)}>
+                <form>
                   <a href={'https://drive.google.com/file/d/'+ documentFormValue.fileId +'/view?usp=drivesdk'} target="_blank" rel="noreferrer" className='mb-3'>
                     Dokument
                   </a>
@@ -351,7 +266,6 @@ function Administrace()
                     id="type"
                     validation
                     className='mt-3 mb-3'
-                    onValueChange={(e) => onChangeDocumentFormType(e)}
                   />
                   <MDBInput label='Název'
                     value={documentFormValue.name}
@@ -359,7 +273,6 @@ function Administrace()
                     id='name'
                     required
                     className='mb-3'
-                    onChange={onChangeDocumentForm}
                   />
                   <MDBInput label='Datum vystavení'
                     value={documentFormValue.issueDate}
@@ -368,7 +281,6 @@ function Administrace()
                     required
                     type='date'
                     className='mb-3'
-                    onChange={onChangeDocumentForm}
                   />
                   {documentFormValue.type === 'D'? 
                     <MDBInput label='Datum expirace'
@@ -378,7 +290,6 @@ function Administrace()
                       required
                       type='date'
                       className='mb-3'
-                      onChange={onChangeDocumentForm}
                     /> : ''}
                   <MDBAutocomplete label='Klient'
                       name='partner'
@@ -387,8 +298,6 @@ function Administrace()
                       data={partnerData}
                       displayValue={(row) => row.partnerName}
                       value={documentFormValue.partnerName}
-                      onSearch={onSearchDocumentFormPartner}
-                      onChange={onChangeDocumentFormPartner}
                       itemContent={(result) => (
                         <div className='autocomplete-custom-item-content'>
                           <div className='autocomplete-custom-item-title'>{result.partnerName}</div>
@@ -405,8 +314,6 @@ function Administrace()
                       data={orderData}
                       displayValue={(row) => row.orderName}
                       value={documentFormValue.orderName}
-                      onSearch={onSearchDocumentFormOrder}
-                      onChange={onChangeDocumentFormOrder}
                       itemContent={(result) => (
                         <div className='autocomplete-custom-item-content'>
                           <div className='autocomplete-custom-item-title'>{result.orderName}</div>
@@ -423,24 +330,12 @@ function Administrace()
                     rows='4'
                     wrapperClass="mb-4"
                     className='mb-3'
-                    onChange={onChangeDocumentForm}
                   />
                   {/* butonky */}
                   <MDBRow>
                     <MDBCol className="d-flex justify-content-end flex-wrap">
-                      <div className="m-1">
-                        <MDBPopconfirm btnChildren={<div>Smazat&nbsp;&nbsp;<MDBIcon far icon='trash-alt'/></div>}
-                          type='button' color='warning'
-                          cancelBtnText='NE' cancelBtnClasses='btn-secondary'
-                          confirmBtnText='Smazat' confirmBtnClasses='btn-warning'
-                          placement='top'
-                          onConfirm={() => {onClickDocumentDelete()}}
-                        >
-                          <MDBPopconfirmMessage icon={<MDBIcon far icon='trash-alt'/>}> Opravdu smazat dokument {documentFormValue.origName}?</MDBPopconfirmMessage>
-                        </MDBPopconfirm>
-                      </div>
                       <MDBBtn type="submit" className="m-1">
-                        Uložit
+                        Zpet - todo
                       </MDBBtn>
                     </MDBCol>
                   </MDBRow>
@@ -490,6 +385,5 @@ function Administrace()
     </>
   )
 }
-// 
 
-export default Administrace;
+export default OrderList;

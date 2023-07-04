@@ -142,7 +142,7 @@ function MainMenu() {
                       <MDBDropdownMenu>
                         {renderUserInfo()}                        
                         <MDBDropdownItem divider/>
-                        <MDBDropdownItem link href="/solar">Seznam zakázek</MDBDropdownItem>
+                        <MDBDropdownItem link href="/orderlist">Seznam zakázek</MDBDropdownItem>
                         <MDBDropdownItem divider/>
                         <MDBDropdownItem link href="/logout">Odhlášení</MDBDropdownItem>
                       </MDBDropdownMenu>

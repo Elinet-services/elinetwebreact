@@ -116,7 +116,7 @@ function ClientReset() {
                         type="password"
                         wrapperClass="mb-4"
                         label="Heslo (min 8 znaků)"
-                        required
+                        required autoComplete="new-password"
                     />
                     <MDBInput
                         name="rePassword"
@@ -126,9 +126,8 @@ function ClientReset() {
                         type="password"
                         wrapperClass="mb-4"
                         label="Heslo pro kontrolu"
-                        required
+                        required autoComplete="new-password"
                     />
-            
                     <MDBBtn type="submit" className="mb-4" block>
                         Změnit heslo
                     </MDBBtn>
