@@ -79,18 +79,6 @@ function Administrace()
   const toggleShowDocumentDetail = () => setShowDocumentDetail(!showDocumentDetail);
 
   //  -------------------------------------------------------------------------------
-  //  preformatuje datum z DB k zobrazeni v prehledu
-  function formatDate(aDate, aDocumentType) {
-    let dateString = '';
-    if (aDocumentType === 'D' && aDate != null) {
-      const firstDot = aDate.indexOf('-');
-      const lastDot  = aDate.lastIndexOf('-');
-      //  kontrola
-      if (firstDot > 0 && lastDot > firstDot )
-        dateString = parseInt(aDate.substring(lastDot + 1)) +'.'+ parseInt(aDate.substring(firstDot + 1, lastDot)) +'.'+ aDate.substring(0, firstDot);
-    }
-    return dateString;
-  }
   //  vrati text typu dokumentu (pro prehled dokumentu)
   function getDocumentTypeText(documentType) {
     for (let item in documentTypeList) {
@@ -200,17 +188,17 @@ function Administrace()
           if (responseData.adminData.documentList) {
             responseData.adminData.documentList.forEach(function (row){
               rows.push( {
-                  fileId: row.fileId,
-                  type: row.type, 
-                  name: row.name, 
-                  issueDate: row.issueDate,
-                  expireDate: row.expireDate,
-                  description: row.description,
-                  partnerName: (row.partnerName === undefined ? '' : row.partnerName),
-                  orderName: (row.orderName === undefined ? '' : row.orderName),
-                  typeText: getDocumentTypeText(row.type),
-                  issueDateText: formatDate(row.issueDate, 'D'),
-                  expireDateText: formatDate(row.expireDate, row.type)
+                  fileId:         row.fileId,
+                  type:           row.type, 
+                  name:           row.name, 
+                  issueDate:      row.issueDate,
+                  expireDate:     row.expireDate,
+                  description:    row.description,
+                  partnerName:    (row.partnerName === undefined ? '' : row.partnerName),
+                  orderName:      (row.orderName === undefined ? '' : row.orderName),
+                  typeText:       getDocumentTypeText(row.type),
+                  issueDateText:  connection.formatDate(row.issueDate, 'D'),
+                  expireDateText: connection.formatDate(row.expireDate, row.type)
                 }
               )
             })
@@ -346,7 +334,7 @@ function Administrace()
                   </a>
                   <MDBSelect label='Typ'
                     data={documentTypeList}
-                    placeholder='Example placeholder'
+                    placeholder='Vyplňte'
                     name="type"
                     id="type"
                     validation

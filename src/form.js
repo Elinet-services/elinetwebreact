@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { MDBCol, MDBInput, MDBTextArea, MDBBtn } from "mdb-react-ui-kit"
-import { sha256 } from "node-forge";
 import connection from './connection.js';
 
 function ContactForm() {
@@ -11,29 +10,16 @@ function ContactForm() {
     name: "",
     email: "",
     phone: "",
-    message: "",
-    password: ""
+    message: ""
   })
 
   const onChange = (e) => {
     setFormValue({ ...formValue, [e.target.name]: e.target.value })
-    if (e.target.name === 'password') {
-      if (e.target.value.length === 0)
-        e.target.setCustomValidity('');
-      else if (e.target.value.length < 8)
-        e.target.setCustomValidity('Heslo musí mít délku alespoň 8 znaků');
-      else
-        e.target.setCustomValidity('');
-    }
   }
 
   function checkForm() 
   {
     let v_ret = true;
-    if (formValue.password.length < 8) {
-      v_ret = false;
-    }
-
     return v_ret;
   }
 
@@ -45,9 +31,6 @@ function ContactForm() {
 
     if (checkForm()) {
 
-      const sha = sha256.create().update(formData.get("password"));
-
-      formData.set("password", sha.digest().toHex());
       formData.append("dateTime", new Date().toUTCString())
       formData.append("source", window.location.pathname.substring(1))
 
@@ -71,7 +54,7 @@ function ContactForm() {
             setError(true)
             return { message: "Nepodarilo se odeslat" }
           } else {
-            setFormValue({ name: "", email: "", phone: "", message: "", password: "" })
+            setFormValue({ name: "", email: "", phone: "", message: ""})
             document.getElementById('contactForm').reset();
             return response.json()
           }
@@ -96,7 +79,7 @@ function ContactForm() {
         {responseMessage}
       </p>
     )
-  } else if (submited && responseMessage & (11 == 2)) {
+  } else if (submited && responseMessage) {
     return (
       <p>
         Odeslano
@@ -146,16 +129,6 @@ function ContactForm() {
           rows={4}
           wrapperClass="mb-4"
           label="Text zprávy"
-        />
-        <MDBInput
-          name="password"
-          id="password"
-          onChange={onChange}
-          value={formValue.password}
-          type="password"
-          wrapperClass="mb-4"
-          label="Heslo (min 8 znaků)"
-          required
         />
 
         <MDBBtn type="submit" className="mb-4" block>

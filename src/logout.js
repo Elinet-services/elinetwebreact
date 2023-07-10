@@ -80,8 +80,9 @@ function Logout()
         <MDBCard>
             <MDBCardBody>
                 <MDBCardText>{responseMessage}</MDBCardText>
+                <span><a href="/login">Přihlaste se prosím</a></span>
             </MDBCardBody>
-            <span><a href="/login">Přihlaste se prosím</a></span>
+
         </MDBCard>
       </section>
     )

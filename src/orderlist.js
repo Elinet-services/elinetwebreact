@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 
 import {
-  MDBCard, MDBCardBody, MDBContainer,
-  MDBInput, MDBSelect, MDBTextArea,
-  MDBDatatable,
-  MDBIcon,
+  MDBCard, MDBCardBody, MDBCardTitle, MDBContainer,
+  MDBDatatable, 
   MDBRow,
   MDBCol,
   MDBBtn,
@@ -14,16 +12,10 @@ import {
   MDBModalHeader,
   MDBModalTitle,
   MDBModalBody,
-  MDBPopconfirm,
-  MDBPopconfirmMessage,
-  MDBAutocomplete,
   MDBSpinner,
   MDBAlert,
-  MDBBtnGroup, MDBRadio
 } from 'mdb-react-ui-kit';
 import connection from './connection.js';
-//import { MDBTreeTable, MDBTreeTableItem, MDBTreeTableHead, MDBTreeTableBody } from 'mdb-react-treetable';
-//import "mdb-react-treetable/dist/css/treetable.min.css"
 
 
 function OrderList()
@@ -32,8 +24,6 @@ function OrderList()
   const [loading, setLoading] = useState(false);  //  volani do DB
   const [error, setError] = useState(false);      //  volani do DB vtratilo chybu
   const [responseMessage, setResponseMessage] = useState(''); //  textova zprava volani do DB
-  const [showDocumentDetail, setShowDocumentDetail] = useState(false);  //  priznak, zobrazit detail dokumentu
-  const [imageThumbnailData, setImageThumbnailData] = useState('');     //  obrazek nahledu dokumentu
 
   const [documentTypeList, setDocumentTypeList] = useState([
     {value: '', text: '' },
@@ -41,8 +31,13 @@ function OrderList()
     {value: 'FV', text: 'Faktura vydaná', defaultSelected: false},
     {value: 'D',  text: 'Dokument', defaultSelected: false} ]
   );
-  /*  SEZNAM DOKUMENTU NA DISKU */
-  const [documentListAll, setDocumentListAll] = useState({rows: []}); //  vsechna data kuli filtrovani Ne/Zarazene/Vse
+  /*  SEZNAM ZAKAZEK  */
+  const [orderList, setOrderList] = useState({
+    columns:  [{label:'Zakázky', field:'name', sort: true}], 
+    rows: []
+  });
+  
+  /*  SEZNAM DOKUMENTU  */
   const [documentList, setDocumentList] = useState({
     columns:  [
       {label:'Soubor', field:'name', sort: true},
@@ -53,14 +48,6 @@ function OrderList()
     rows: []
   });
 
-  /*  SEZNAM PARTNERU  */
-  const [partnerDataAll, setPartnerDataAll] = useState([]);
-  const [partnerData, setPartnerData] = useState([]); //  odfiltrovany seznam
-
-  /*  SEZNAM ZAKAZEK  */
-  const [orderDataAll, setOrderDataAll] = useState([]);
-  const [orderData, setOrderData] = useState([]);     //  odfiltrovany seznam
-  
   //  -------------------------------------------------------------------------------
   //  volani DB pro uvodni nacteni z DB
   useEffect(() => {
@@ -74,22 +61,6 @@ function OrderList()
   }, []);
 
   //  -------------------------------------------------------------------------------
-  //  zobrazeni Modalnich oken
-  const toggleShowDocumentDetail = () => setShowDocumentDetail(!showDocumentDetail);
-
-  //  -------------------------------------------------------------------------------
-  //  preformatuje datum z DB k zobrazeni v prehledu
-  function formatDate(aDate, aDocumentType) {
-    let dateString = '';
-    if (aDocumentType === 'D' && aDate != null) {
-      const firstDot = aDate.indexOf('-');
-      const lastDot  = aDate.lastIndexOf('-');
-      //  kontrola
-      if (firstDot > 0 && lastDot > firstDot )
-        dateString = parseInt(aDate.substring(lastDot + 1)) +'.'+ parseInt(aDate.substring(firstDot + 1, lastDot)) +'.'+ aDate.substring(0, firstDot);
-    }
-    return dateString;
-  }
   //  vrati text typu dokumentu (pro prehled dokumentu)
   function getDocumentTypeText(documentType) {
     for (let item in documentTypeList) {
@@ -98,36 +69,22 @@ function OrderList()
     }
     return '';
   }
-  //  plni comboBox documentType podle hodnoty (nastavi defaultSelected = true)
-  const updateDocumentTypeItem = (index, selected) => {
-    let newArr = [...documentTypeList];
-    newArr[index].defaultSelected = selected;
-    setDocumentTypeList(newArr);
-  }
-  const fillDocumentTypeList = (documentTypeValue) => {
-    for (let item in documentTypeList) {
-      updateDocumentTypeItem(item, documentTypeList[item].value === documentTypeValue)
-    }
-  }
- 
-  //  -------------------------------------------------------------------------------
-  /* obsluha DOCUMENT formular */
-  const [documentFormValue, setDocumentFormValue] = useState({
-    fileId: '', type: '', name: '', issueDate: '', expireDate: '', 
-    //idPartner: '', idOrder: '', 
-    description: '', partnerName:'', orderName: '', origName: ''
-  });
-  
+
+  //  naplni seznam dokumentu pro vybranou zakazku
+  function setDocumentListOne(aDocumentList) {
+    setDocumentList({...documentList, rows: aDocumentList});
+  };
+
   //  -------------------------------------------------------------------------------
   //  odesle data do DB
   function processRequest(formData)
   {
-    if (formData.get('action') !== 'getThumbnailData')
-      setLoading(true);
+    setLoading(true);
     setError(false);
     setResponseMessage('');
 
     formData.append("source", window.location.pathname.substring(1));
+    formData.append("token", connection.getToken());
     
     fetch(connection.getConnectionUrl(), {
       method: "POST",
@@ -149,40 +106,41 @@ function OrderList()
         //  console.log(responseData)
         setResponseMessage(responseData.message);
 
-        if (formData.get('action') === 'getThumbnailData'){  //zpracuj nahled dokumentu
-          let imageContent = '';
-          const bytes = new Uint8Array( responseData.adminData.thumbnailData );
-          const len = bytes.byteLength;
-          for (let i = 0; i < len; i++) {
-            imageContent += String.fromCharCode( bytes[ i ] );
-          }
-          setImageThumbnailData( btoa(imageContent) );
-        }
-        else {
-          setPartnerDataAll(responseData.adminData.partnerList);
-          setPartnerData(responseData.adminData.partnerList);
-          let rows = [];
-          //  naplnit seznam dokumentu
-          responseData.adminData.documentList.forEach(function (row){
-            rows.push( {
-                fileId: row.fileId,
-                type: row.type, 
-                name: row.name, 
-                issueDate: row.issueDate,
-                expireDate: row.expireDate,
-                description: row.description,
-                partnerName: (row.partnerName === undefined ? '' : row.partnerName),
-                orderName: (row.orderName === undefined ? '' : row.orderName),
-                typeText: getDocumentTypeText(row.type),
-                issueDateText: formatDate(row.issueDate, 'D'),
-                expireDateText: formatDate(row.expireDate, row.type)
-              }
-            )
+        //  naplnit prehled zakazek
+        let orders = [];
+        let documents = [];
+
+        if (responseData.adminData.orderList) {
+          //  projdem seznam zakazek
+          responseData.adminData.orderList.forEach(function (order){
+
+            //  v nem seznam dokumentu
+            documents = [];
+            order.documentList.forEach(function (document){
+              documents.push({
+                fileId:         document.fileId,
+                type:           document.type,
+                name:           document.name,
+                issueDate:      document.issueDate,
+                expireDate:     document.expireDate,
+                description:    document.description,
+                typeText:       getDocumentTypeText(document.type),
+                issueDateText:  connection.formatDate(document.issueDate, 'D'),
+                expireDateText: connection.formatDate(document.expireDate, document.type)
+              });
+            })
+            if (orders.length === 0)  //  naplneni pro 1. zakazku
+              setDocumentListOne (documents);
+
+            orders.push({ name: order.name,
+                          'documentList' : documents
+            })
           })
-          setDocumentListAll({...documentListAll, rows});
         }
+        setOrderList({...orderList, rows: orders});         
+        
         setLoading(false);
-        if (responseData.message.length > 0 /*&& formData.get('action') === 'submitForm'*/)  //  zobrazit vysledek volani DB - responseMessage
+        if (responseData.message.length > 0)  //  zobrazit vysledek volani DB - responseMessage
           submitAlertMessage.current.click();
       })
       .catch((e) => {
@@ -194,17 +152,6 @@ function OrderList()
       })
   }
 
-//  -------------------------------------------------------------------------------
-  //  nacteni nahledu dokumentu
-  function getThumbnailData(fileId)
-  {
-    const formData = new FormData();
-    formData.append("action", 'getThumbnailData');
-    formData.append("fileId", fileId);
-    setImageThumbnailData('');
-    processRequest(formData);
-  }
-  
   //  -------------------------------------------------------------------------------
   //  H L A V N I   B L O K
   //  -------------------------------------------------------------------------------
@@ -212,149 +159,56 @@ function OrderList()
     <>
     <MDBContainer className="py-5">
       <MDBRow>
-        {/* SEZNAM DOKUMENTU */}
-        <MDBCol>
+        {/* SEZNAM ZAKAZEK */}
+        <MDBCol md='3'>
           <MDBCard>
             <MDBCardBody>
-              <MDBDatatable 
-                data={documentList} 
-                maxHeight='400px' 
+              <MDBDatatable maxHeight='400px' maxWidth='300px'
+                data={orderList} 
                 pagination={false}
                 hover
                 entries={9999}
                 bordered
-                noFoundMessage = 'Dokument nenalezen'
+                noFoundMessage = 'Zakázka nenalezena'
                 allText='Vše' rowsText='Řádek' ofText='z' 
-                fixedHeader search striped sm
+                fixedHeader striped sm
                 onRowClick={(row) => {
-                    setDocumentFormValue(
-                      { fileId: row.fileId, type: row.type, name: row.name.substring(0, row.name.lastIndexOf('.')), 
-                        issueDate: row.issueDate, expireDate: row.expireDate,
-                        description: row.description, partnerName: row.partnerName, orderName: row.orderName, origName: row.name}
-                    );
-                    fillDocumentTypeList(row.type);
+                    setDocumentListOne(row.documentList);
                   }
                 }
               />
             </MDBCardBody>
           </MDBCard>
         </MDBCol>
+
+        {/* SEZNAM DOKUMENTU */}
+        <MDBCol md='9'>
+          <MDBCard>
+            <MDBCardBody>
+              <MDBCardTitle>Seznam dokumentů</MDBCardTitle>
+              <MDBDatatable maxHeight='400px'
+                data={documentList}
+                pagination={false}
+                hover
+                entries={9999}
+                bordered
+                noFoundMessage = 'Dokument nenalezen'
+                allText='Vše' rowsText='Řádek' ofText='z' 
+                fixedHeader striped sm
+                onRowClick={(row) => {
+                    const url = 'https://drive.google.com/file/d/'+ row.fileId +'/view?usp=drive_link'; //  zobrazit
+                    //const url = 'https://drive.google.com/uc?id='+ row.fileId +'&export=download';    //  stahnout
+                    window.open(url, row.name);
+                  }
+                }
+              />
+              </MDBCardBody>
+          </MDBCard>
+        </MDBCol>
       </MDBRow>
     </MDBContainer>
 
-    {/* DETAIL DOCUMENTU */}
-    <MDBModal tabIndex='-1' show={showDocumentDetail} setShow={setShowDocumentDetail}>
-      <MDBModalDialog size="xl">
-        <MDBModalContent>
-          <MDBModalHeader>
-            <MDBModalTitle>{documentFormValue.origName}</MDBModalTitle>
-            <MDBBtn
-            ></MDBBtn>
-          </MDBModalHeader>
-          <MDBModalBody>
-            <MDBRow>
-              {/* 1. sloupec s daty */}
-              <MDBCol md='3'>
-                <form>
-                  <a href={'https://drive.google.com/file/d/'+ documentFormValue.fileId +'/view?usp=drivesdk'} target="_blank" rel="noreferrer" className='mb-3'>
-                    Dokument
-                  </a>
-                  <MDBSelect label='Typ'
-                    data={documentTypeList}
-                    placeholder='Example placeholder'
-                    name="type"
-                    id="type"
-                    validation
-                    className='mt-3 mb-3'
-                  />
-                  <MDBInput label='Název'
-                    value={documentFormValue.name}
-                    name='name'
-                    id='name'
-                    required
-                    className='mb-3'
-                  />
-                  <MDBInput label='Datum vystavení'
-                    value={documentFormValue.issueDate}
-                    name='issueDate'
-                    id='issueDate'
-                    required
-                    type='date'
-                    className='mb-3'
-                  />
-                  {documentFormValue.type === 'D'? 
-                    <MDBInput label='Datum expirace'
-                      value={documentFormValue.expireDate}
-                      name='expireDate'
-                      id='expireDate'
-                      required
-                      type='date'
-                      className='mb-3'
-                    /> : ''}
-                  <MDBAutocomplete label='Klient'
-                      name='partner'
-                      id='partner'
-                      required
-                      data={partnerData}
-                      displayValue={(row) => row.partnerName}
-                      value={documentFormValue.partnerName}
-                      itemContent={(result) => (
-                        <div className='autocomplete-custom-item-content'>
-                          <div className='autocomplete-custom-item-title'>{result.partnerName}</div>
-                          <div className='autocomplete-custom-item-subtitle'>{result.description}</div>
-                        </div>)}
-                      className='mb-3'
-                      listHeight='250px'
-                      noResults={<div className='text-warning'>Firma nenalezena, zadáváte novou</div>}
-                  />
-                  <MDBAutocomplete label='Zakázka'
-                      name='order'
-                      id='order'
-                      required
-                      data={orderData}
-                      displayValue={(row) => row.orderName}
-                      value={documentFormValue.orderName}
-                      itemContent={(result) => (
-                        <div className='autocomplete-custom-item-content'>
-                          <div className='autocomplete-custom-item-title'>{result.orderName}</div>
-                          <div className='autocomplete-custom-item-subtitle'>{result.description}</div>
-                        </div>)}
-                      className='mb-3'
-                      listHeight='250px'
-                      noResults={<div className='text-warning'>Zakázka nenalezena, zadáváte novou</div>}
-                  />
-                  <MDBTextArea label='Popis'
-                    value={documentFormValue.description}
-                    name='description'
-                    id='description'
-                    rows='4'
-                    wrapperClass="mb-4"
-                    className='mb-3'
-                  />
-                  {/* butonky */}
-                  <MDBRow>
-                    <MDBCol className="d-flex justify-content-end flex-wrap">
-                      <MDBBtn type="submit" className="m-1">
-                        Zpet - todo
-                      </MDBBtn>
-                    </MDBCol>
-                  </MDBRow>
-                </form>
-              </MDBCol>
-              {/* 2. sloupec s nahledem dokumentu */}
-              <MDBCol>
-                {imageThumbnailData.length === 0 ? 
-                  <MDBSpinner role='status'/> :
-                  <img src={`data:image/jpeg;base64,${imageThumbnailData}`} className='img-fluid shadow-4' alt={documentFormValue.name} />
-                }
-              </MDBCol>
-            </MDBRow>
-          </MDBModalBody>
-        </MDBModalContent>
-      </MDBModalDialog>
-    </MDBModal>
-
-    {/* Odeslani do DB */}
+     {/* Odeslani do DB */}
     <MDBModal show={loading} tabIndex='-1' staticBackdrop>
       <MDBModalDialog size="lg">
         <MDBModalContent>

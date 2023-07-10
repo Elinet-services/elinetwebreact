@@ -5,8 +5,9 @@ exports.getUserName     = getUserName;
 exports.getPartnerName  = getPartnerName;
 exports.setCookies      = setCookies;
 exports.resetCookies    = resetCookies;
+exports.formatDate      = formatDate;
 
-const url = "https://script.google.com/macros/s/AKfycbzoNHGQa36wNcDcA0Dn4g92T0LlrgaC56xJPDIFnYKXElnkRzVpdkaXtf7eKWfClwF-TA/exec";
+const url = "https://script.google.com/macros/s/AKfycbyRnV8Q5Q6J8F9irrs4PnpmP8bKepOJ37jssRWh5KRug2Rt8_TZV5Y-7q02IPIRbi0DWg/exec";
 const cookieTimeout = 60;   //  platnost cookie v minutach
 
 function getConnectionUrl () {
@@ -69,4 +70,18 @@ function deleteCookie(aName)
 {
     const expireDate = new Date(0);
     document.cookie = aName +"=;expires="+ expireDate.toUTCString() +";path=/";
+}
+
+//  -------------------------------------------------------------------------------
+//  preformatuje datum z DB k zobrazeni v prehledu
+function formatDate(aDate, aDocumentType) {
+    let dateString = '';
+    if (aDocumentType === 'D' && aDate != null) {
+        const firstDot = aDate.indexOf('-');
+        const lastDot  = aDate.lastIndexOf('-');
+        //  kontrola
+        if (firstDot > 0 && lastDot > firstDot )
+        dateString = parseInt(aDate.substring(lastDot + 1)) +'.'+ parseInt(aDate.substring(firstDot + 1, lastDot)) +'.'+ aDate.substring(0, firstDot);
+    }
+    return dateString;
 }
