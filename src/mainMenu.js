@@ -85,43 +85,34 @@ function MainMenu() {
           <MDBCollapse show={showBasic} navbar>
             <MDBNavbarNav className="my-2 mb-lg-0">
               <MDBNavbarItem>
-                <MDBNavbarLink
-                  href="/network"
-                  className={getActiveMenu("network")}
-                >
+                <MDBNavbarLink href="/network" className={getActiveMenu("network")}>
                   IT řešení
                 </MDBNavbarLink>
               </MDBNavbarItem>
               <MDBNavbarItem>
-                <MDBNavbarLink
-                  href="/solar"
-                  className={getActiveMenu("solar")}
-                >
+                <MDBNavbarLink href="/solar" className={getActiveMenu("solar")}>
                   Fotovoltaika
                 </MDBNavbarLink>
               </MDBNavbarItem>
               <MDBNavbarItem>
-                <MDBNavbarLink
-                  href="/security"
-                  className={getActiveMenu("security")}
-                >
+                <MDBNavbarLink href="/security" className={getActiveMenu("security")}>
                   Zabezpečení
                 </MDBNavbarLink>
               </MDBNavbarItem>
               <MDBNavbarItem>
-                <MDBNavbarLink href="/about" className="px-3">
+                <MDBNavbarLink href="/about" className={getActiveMenu("about")}>
                   O nás
                 </MDBNavbarLink>
               </MDBNavbarItem>
               <MDBNavbarItem>
-                <MDBNavbarLink href="/contact" className="px-3">
+                <MDBNavbarLink href="/contact" className={getActiveMenu("contact")}>
                   Kontakt
                 </MDBNavbarLink>
               </MDBNavbarItem>
               
               <MDBNavbarItem>
                 {connection.getOperatorLevel() === 'N' ? 
-                  <MDBNavbarLink href="/login" className="px-3">
+                  <MDBNavbarLink href="/login" className={getActiveMenu("login")}>
                     Přihlášení
                   </MDBNavbarLink>
                 :
@@ -204,12 +195,12 @@ export function mainFooter(params) {
             <MDBCol md="3" lg="2" xl="2" className="mx-auto mb-4">
               <h6 className="text-uppercase fw-bold mb-4">O společnosti</h6>
               <p>
-                <a href="./NoPage" className="text-reset">
+                <a href="./about" className="text-reset">
                   O nás
                 </a>
               </p>
               <p>
-                <a href="./NoPage" className="text-reset">
+                <a href="./contact" className="text-reset">
                   Kontakty
                 </a>
               </p>
@@ -257,7 +248,7 @@ export function mainFooter(params) {
         className="text-center p-1"
         style={{ backgroundColor: "rgba(0, 0, 0, 0.02)" }}
       >
-        © 2022 Copyright:{" "}
+        © 2023 Copyright:{" "}
         <a className="text-reset fw-bold" href="https://elinet.cz/">
           Elinet.cz
         </a>

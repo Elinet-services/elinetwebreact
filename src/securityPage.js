@@ -9,7 +9,7 @@ import {
 
 import ContactForm from "./form"
 
-function Solar() {
+function securityPage() {
   return (
     <MDBCard>
       <MDBCardImage
@@ -53,4 +53,4 @@ function Solar() {
   )
 }
 
-export default Solar
+export default securityPage;

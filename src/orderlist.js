@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 import {
-  MDBCard, MDBCardBody, MDBCardTitle, MDBContainer,
+  MDBCard, MDBCardBody, MDBContainer,
   MDBDatatable, 
   MDBRow,
   MDBCol,
@@ -85,10 +85,10 @@ function OrderList()
 
     formData.append("source", window.location.pathname.substring(1));
     formData.append("token", connection.getToken());
-    
+
     fetch(connection.getConnectionUrl(), {
       method: "POST",
-      body: formData,
+      body: formData
     })
       .then((response) => {
         /* if (response.status === 401) {
@@ -185,7 +185,6 @@ function OrderList()
         <MDBCol md='9'>
           <MDBCard>
             <MDBCardBody>
-              <MDBCardTitle>Seznam dokumentů</MDBCardTitle>
               <MDBDatatable maxHeight='400px'
                 data={documentList}
                 pagination={false}

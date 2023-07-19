@@ -11,6 +11,8 @@ import MainPage from "./mainPage"
 import SolarPage from "./solarPage"
 import SecurityPage from "./securityPage"
 import NetworkPage from "./networkPage"
+import AboutPage from "./aboutPage"
+import ContactPage from "./contactPage"
 
 import RegisterPage from "./clientRegister"
 import RegisterPageDone from "./clientRegisterDone"
@@ -35,8 +37,8 @@ export default function RoutePage() {
             <Route path="solar" element={<SolarPage />} />
             <Route path="security" element={<SecurityPage />} />
             <Route path="network" element={<NetworkPage />} />
-            <Route path="about" element={<NoPage />} />
-            <Route path="contacts" element={<NoPage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="contact" element={<ContactPage />} />
 
             <Route path="register" element={<RegisterPage />} />
             <Route path="registerDone" element={<RegisterPageDone />} />
