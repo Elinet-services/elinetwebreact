@@ -18,7 +18,6 @@ import RegisterPage from "./clientRegister"
 import RegisterPageDone from "./clientRegisterDone"
 
 import Login from "./clientLogin"
-import Logout from "./logout"
 import Forgot from "./clientForgot"
 import ResetPassword from "./clientReset"
 import Administrace from "./administrace"
@@ -44,7 +43,6 @@ export default function RoutePage() {
             <Route path="registerDone" element={<RegisterPageDone />} />
 
             <Route path="login" element={<Login />} />
-            <Route path="logout" element={<Logout />} />
             <Route path="forgot" element={<Forgot />} />           
             <Route path="administrace" element={<Administrace />} />
             <Route path="orderlist" element={<OrderList />} />

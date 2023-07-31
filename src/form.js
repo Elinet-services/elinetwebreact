@@ -1,9 +1,12 @@
-import { useState } from "react"
-import { MDBCol, MDBInput, MDBTextArea, MDBBtn } from "mdb-react-ui-kit"
+import { useState, useRef } from "react"
+import { MDBCol, MDBInput, MDBTextArea, MDBBtn,
+  MDBModal, MDBModalDialog, MDBModalContent, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBAlert, MDBSpinner
+} from "mdb-react-ui-kit"
 import connection from './connection.js';
 
 function ContactForm() {
-  const [submited, setSubmited] = useState(false)
+  const submitAlertMessage = useRef(null);        //  zobrazeni responseMessage v MDBAlertu po volani DB
+  const [loading, setLoading] = useState(false);  //  volani do DB
   const [error, setError] = useState(false)
   const [responseMessage, setResponseMessage] = useState()
   const [formValue, setFormValue] = useState({
@@ -23,88 +26,45 @@ function ContactForm() {
     return v_ret;
   }
 
-  function Submit(e)
+  async function Submit(e)
   {
     e.preventDefault();
 
     const formData = new FormData(document.getElementById("contactForm"));
+    /* for (const pair of formData.entries()) {
+      console.log(pair[0] +', '+ pair[1]);
+    } */
 
     if (checkForm()) {
+      setLoading(true);
 
-      formData.append("dateTime", new Date().toUTCString())
-      formData.append("source", window.location.pathname.substring(1))
-
-      /* for (const pair of formData.entries()) {
-        console.log(pair[0] +', '+ pair[1]);
-      } */
-      console.log(formData);
-      setSubmited(true) //  nastavime odeslano
-
-      fetch(connection.getConnectionUrl(), {
-        method: "POST",
-        body: formData,
-      })
-        .then((response) => {
-          /* if (response.status === 401) {
-            navigate('/login');
-          } */
-
-          console.log(response)
-          if (!response.ok) {
-            setError(true)
-            return { message: "Nepodarilo se odeslat" }
-          } else {
-            setFormValue({ name: "", email: "", phone: "", message: ""})
-            document.getElementById('contactForm').reset();
-            return response.json()
-          }
-        })
-        .then((responseData) => {
-          console.log(responseData.message)
-          setResponseMessage(responseData.message)
-        })
-        .catch((e) => {
-          console.log(e.message)
-          setError(true)
-          setResponseMessage("Kriticka chyba")
-        })
+      let response = await connection.processRequest(formData);
+      setError(response.isError);
+      setResponseMessage (response.responseMessage);
+  
+      if (!response.isError) {
+        setFormValue({ name: "", email: "", phone: "", message: ""})
+      }
+      setLoading(false);
+      if (response && response.responseMessage && response.responseMessage.length > 0)  //  zobrazit vysledek volani DB - responseMessage
+        submitAlertMessage.current.click();
     }
   }
   
-  if (error) {
-    return (
-      <p>
-        neco se pokazilo
-        <br />
-        {responseMessage}
-      </p>
-    )
-  } else if (submited && responseMessage) {
-    return (
-      <p>
-        Odeslano
-        <br />
-        {responseMessage}
-      </p>
-    )
-  } else {
-    return (
+  return (
+    <>
       <form onSubmit={(e) => Submit(e)} id="contactForm">
         <MDBCol className="formHead mb-3">
           Rádi poskytneme bližší informace:{" "}
         </MDBCol>
-        <MDBInput
-          name="name"
-          id="name"
+        <MDBInput name="name" id="name" autoComplete="name"
           onChange={onChange}
           value={formValue.name}
           wrapperClass="mb-4"
           label="Jméno a příjmení"
           required
         />
-        <MDBInput
-          name="email"
-          id="email"
+        <MDBInput name="email" id="email" autoComplete="email"
           onChange={onChange}
           value={formValue.email}
           type="email"
@@ -112,9 +72,7 @@ function ContactForm() {
           label="Email"
           required
         />
-        <MDBInput
-          name="phone"
-          id="phone"
+        <MDBInput name="phone" id="phone" autoComplete="tel"
           onChange={onChange}
           value={formValue.phone}
           type='tel'
@@ -135,8 +93,35 @@ function ContactForm() {
           Odeslat
         </MDBBtn>
       </form>
-    )
-  }
+      {/* Odeslani do DB */}
+      <MDBModal show={loading} tabIndex='-1' staticBackdrop>
+        <MDBModalDialog size="lg">
+          <MDBModalContent>
+            <MDBModalHeader>
+              <MDBModalTitle>Odesílání do DB</MDBModalTitle>
+            </MDBModalHeader>
+            <MDBModalBody>
+              <div className='text-center'>
+                <MDBSpinner role='status'/>
+              </div>
+            </MDBModalBody>
+          </MDBModalContent>
+        </MDBModalDialog>
+      </MDBModal>
+      {/* zobrazeni responseMessage */}
+      <MDBBtn className='visually-hidden' ref={submitAlertMessage}/>
+      <MDBAlert triggerRef={submitAlertMessage}
+          color={error ? 'danger':'success'}
+          autohide appendToBody
+          position='top-center'
+          width={800}          
+          offset={150}
+          delay={3000}
+        >
+          {responseMessage}
+      </MDBAlert>
+    </> 
+  )
 }
 
 export default ContactForm;

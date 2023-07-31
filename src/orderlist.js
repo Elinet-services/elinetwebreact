@@ -51,12 +51,6 @@ function OrderList()
   //  -------------------------------------------------------------------------------
   //  volani DB pro uvodni nacteni z DB
   useEffect(() => {
-    const loadData = () => {
-      const formData = new FormData();
-      formData.append("action", 'loadData');
-      processRequest(formData);
-    };
-
     loadData();
   }, []);
 
@@ -77,79 +71,56 @@ function OrderList()
 
   //  -------------------------------------------------------------------------------
   //  odesle data do DB
-  function processRequest(formData)
+  async function loadData()
   {
     setLoading(true);
     setError(false);
     setResponseMessage('');
 
-    formData.append("source", window.location.pathname.substring(1));
-    formData.append("token", connection.getToken());
+    const formData = new FormData();
+    formData.append("action", 'loadData');
 
-    fetch(connection.getConnectionUrl(), {
-      method: "POST",
-      body: formData
-    })
-      .then((response) => {
-        /* if (response.status === 401) {
-          navigate('/login');
-        } */
+    let response = await connection.processRequest(formData);
+    setError(response.isError);
+    setResponseMessage (response.responseMessage);
 
-        if (!response.ok) {
-          setError(true)
-          return { message: "Nepodařilo se odeslat" }
-        } else {
-          return response.json()
-        }
-      })
-      .then((responseData) => {
-        //  console.log(responseData)
-        setResponseMessage(responseData.message);
+    if (!response.isError) {
+      //  naplnit prehled zakazek
+      let orders = [];
+      let documents = [];
 
-        //  naplnit prehled zakazek
-        let orders = [];
-        let documents = [];
+      if (response.adminData.orderList) {
+        //  projdem seznam zakazek
+        response.adminData.orderList.forEach(function (order){
 
-        if (responseData.adminData.orderList) {
-          //  projdem seznam zakazek
-          responseData.adminData.orderList.forEach(function (order){
-
-            //  v nem seznam dokumentu
-            documents = [];
-            order.documentList.forEach(function (document){
-              documents.push({
-                fileId:         document.fileId,
-                type:           document.type,
-                name:           document.name,
-                issueDate:      document.issueDate,
-                expireDate:     document.expireDate,
-                description:    document.description,
-                typeText:       getDocumentTypeText(document.type),
-                issueDateText:  connection.formatDate(document.issueDate, 'D'),
-                expireDateText: connection.formatDate(document.expireDate, document.type)
-              });
-            })
-            if (orders.length === 0)  //  naplneni pro 1. zakazku
-              setDocumentListOne (documents);
-
-            orders.push({ name: order.name,
-                          'documentList' : documents
-            })
+          //  v nem seznam dokumentu
+          documents = [];
+          order.documentList.forEach(function (document){
+            documents.push({
+              fileId:         document.fileId,
+              type:           document.type,
+              name:           document.name,
+              issueDate:      document.issueDate,
+              expireDate:     document.expireDate,
+              description:    document.description,
+              typeText:       getDocumentTypeText(document.type),
+              issueDateText:  connection.formatDate(document.issueDate, 'D'),
+              expireDateText: connection.formatDate(document.expireDate, document.type)
+            });
           })
-        }
-        setOrderList({...orderList, rows: orders});         
-        
-        setLoading(false);
-        if (responseData.message.length > 0)  //  zobrazit vysledek volani DB - responseMessage
-          submitAlertMessage.current.click();
-      })
-      .catch((e) => {
-        console.log(e.message)
-        setLoading(false);
-        setError(true);
-        setResponseMessage("Kritická chyba: "+ e.message);
-        submitAlertMessage.current.click();
-      })
+          if (orders.length === 0)  //  naplneni pro 1. zakazku
+            setDocumentListOne (documents);
+
+          orders.push({ name: order.name,
+                        'documentList' : documents
+          })
+        })
+      }
+      setOrderList({...orderList, rows: orders});         
+    }
+    setLoading(false);
+    if (response && response.responseMessage && response.responseMessage.length > 0)  //  zobrazit vysledek volani DB - responseMessage
+      submitAlertMessage.current.click();
   }
 
   //  -------------------------------------------------------------------------------
@@ -222,11 +193,10 @@ function OrderList()
         </MDBModalContent>
       </MDBModalDialog>
     </MDBModal>
-
     {/* zobrazeni responseMessage */}
     <MDBBtn className='visually-hidden' ref={submitAlertMessage}/>
     <MDBAlert triggerRef={submitAlertMessage}
-        color={error ? 'danger':'primary'}
+        color={error ? 'danger':'success'}
         autohide appendToBody
         position='top-center'
         width={800}

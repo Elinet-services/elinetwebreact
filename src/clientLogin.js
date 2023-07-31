@@ -1,29 +1,28 @@
-import { useState,useEffect } from "react";
-import { MDBInput, MDBBtn, MDBCard, MDBCardBody, MDBCardText } from "mdb-react-ui-kit"
+import { useState, useEffect, useRef } from "react";
+import {  MDBInput, MDBBtn, MDBCard, MDBCardBody, MDBCardText,
+          MDBModal, MDBModalDialog, MDBModalContent, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBSpinner, MDBAlert
+} from "mdb-react-ui-kit"
 
 import { sha256 } from "node-forge";
 import connection from './connection.js';
 
 function ClientLogin() {
+    const submitAlertMessage = useRef(null);        //  zobrazeni responseMessage v MDBAlertu po volani DB
+    const [loading, setLoading] = useState(false);  //  volani do DB
+    const [error, setError] = useState(false)       //  volani do DB vratilo chybu
+    const [responseMessage, setResponseMessage] = useState('')
+
     const [logged, setLogged] = useState(false)
-    const [error, setError] = useState(false)
-    const [responseMessage, setResponseMessage] = useState()
     const [formValue, setFormValue] = useState({
         email: "",
         password: ""
     });
 
-    useEffect(() => {
+  useEffect(() => {
       connection.resetCookies();
-      //connection.setCookie('operatorLevel', 'N', { path: '/'});
-      //cookies.set('userName', '', { path: '/'});
-      //cookies.set('partnerName', '', { path: '/'});
     }, []);  
 
     const onChange = (e) => {
-      //var cookie = require('cookie');
-      //cookie.serialize('token','abcd123d',{expires: new Date()});
-
         setFormValue({ ...formValue, [e.target.name]: e.target.value })
         if (e.target.name === 'password') {
             if (e.target.value.length === 0)
@@ -35,77 +34,44 @@ function ClientLogin() {
         }
     }
 
-    function Submit(e)
+    async function Login(e)
     {
       e.preventDefault();
+      setLoading(true);
+      setError(false);
 
       const formData = new FormData(document.getElementById("loginForm"));
-      
       const sha = sha256.create().update(formData.get("email").toLowerCase() + formData.get("password"));
-
       formData.set("password", sha.digest().toHex());
-      formData.append("source", 'login');
 
-      fetch(connection.getConnectionUrl(), {
-        method: "POST",
-        body: formData,
-      })
-        .then((response) => {
-          /* if (response.status === 401) {
-            navigate('/login');
-          } */
+      let response = await connection.processRequest(formData);
+      setError(response.isError);
+      setResponseMessage (response.responseMessage);
 
-          console.log(response)
-          if (!response.ok) {
-            setError(true)
-            return { result: "Nepodarilo se odeslat" }
-          } else {
-            setFormValue({ email: "", password: ""})
-            document.getElementById('loginForm').reset();
-            setLogged(true) //  nastavime prihlaseno
-            return response.json()
-          }
-        })
-        .then((responseData) => {
-          console.log(responseData.result)
-          setResponseMessage(responseData.message)
-          connection.setCookies(responseData.adminData.connection);
+      if (!response.isError) {
+        setFormValue({ email: "", password: ""})
+        document.getElementById('loginForm').reset();
+
+        if (response.adminData && response.adminData.connection) {
+          setLogged(true);
+          connection.setCookies(response.adminData.connection);
           setTimeout(() => {
             window.location.replace('/');
           }, 2000);
-        })
-        .catch((e) => {
-          console.log(e.message)
-          setError(true)
-          setResponseMessage("Kriticka chyba")
-        })
-
+        }
+      }
+      setLoading(false);
+      if (response && response.responseMessage && response.responseMessage.length > 0)  //  zobrazit vysledek volani DB - responseMessage
+        submitAlertMessage.current.click();
     }
-    if (error) {
-        return (
-          <p>
-            neco se pokazilo
-            <br />
-            {responseMessage}
-          </p>
-        )
-    } else if (logged) {
-        return (
-          <section className="d-flex justify-content-center">
-            <MDBCard>
-                <MDBCardBody>
-                    <MDBCardText>{responseMessage}</MDBCardText>
-                </MDBCardBody>
-            </MDBCard>
-          </section>
-        )
-    } else 
-    return (
-    <section className="d-flex justify-content-center">
+    
+  return (
+    <>
+    <section className={"d-flex justify-content-center"+ (logged ? ' visually-hidden':'')}>
         <MDBCard>
             <MDBCardBody>
                 <MDBCardText>Přihlášení</MDBCardText>
-                <form onSubmit={(e) => Submit(e)} id="loginForm" >
+                <form onSubmit={(e) => Login(e)} id="loginForm" >
                     <MDBInput
                         name="email"
                         id="email"
@@ -126,7 +92,7 @@ function ClientLogin() {
                         label="Heslo (min 8 znaků)"
                         required autoComplete="current-password"
                     />
-            
+
                     <MDBBtn type="submit" className="mb-4" block>
                         Přihlásit
                     </MDBBtn>
@@ -136,7 +102,36 @@ function ClientLogin() {
             </MDBCardBody>
         </MDBCard>
     </section>
-    )
+
+    {/* Odeslani do DB */}
+    <MDBModal show={loading} tabIndex='-1' staticBackdrop>
+      <MDBModalDialog size="lg">
+        <MDBModalContent>
+          <MDBModalHeader>
+            <MDBModalTitle>Odesílání do DB</MDBModalTitle>
+          </MDBModalHeader>
+          <MDBModalBody>
+            <div className='text-center'>
+              <MDBSpinner role='status'/>
+            </div>
+          </MDBModalBody>
+        </MDBModalContent>
+      </MDBModalDialog>
+    </MDBModal>
+    {/* zobrazeni responseMessage */}
+    <MDBBtn className='visually-hidden' ref={submitAlertMessage}/>
+    <MDBAlert triggerRef={submitAlertMessage}
+        color={error ? 'danger':'success'}
+        autohide appendToBody
+        position='top-center'
+        width={800}
+        offset={50}
+        delay={2000}
+      >
+        {responseMessage}
+    </MDBAlert>
+    </>
+  )
 }
 
 export default ClientLogin;

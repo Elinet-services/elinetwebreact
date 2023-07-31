@@ -32,6 +32,7 @@ function Administrace()
   const [loading, setLoading] = useState(false);  //  volani do DB
   const [error, setError] = useState(false);      //  volani do DB vtratilo chybu
   const [responseMessage, setResponseMessage] = useState(''); //  textova zprava volani do DB
+
   const [showDocumentDetail, setShowDocumentDetail] = useState(false);  //  priznak, zobrazit detail dokumentu
   const [imageThumbnailData, setImageThumbnailData] = useState('');     //  obrazek nahledu dokumentu
   const [documentListFilter, setDocumentListFilter] = useState('N');    //  vyber filtru Ne/Zarazene/Vse
@@ -139,84 +140,59 @@ function Administrace()
 
   //  -------------------------------------------------------------------------------
   //  odesle data do DB
-  function processRequest(formData)
+  async function processRequest(formData)
   {
     if (formData.get('action') !== 'getThumbnailData')
       setLoading(true);
     setError(false);
     setResponseMessage('');
 
-    formData.append("source", window.location.pathname.substring(1));
-    formData.append("token", connection.getToken());
-    
-    fetch(connection.getConnectionUrl(), {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        /* if (response.status === 401) {
-          navigate('/login');
-        } */
+    let response = await connection.processRequest(formData);
+    setError(response.isError);
+    setResponseMessage (response.responseMessage);
 
-        if (!response.ok) {
-          setError(true)
-          return { message: "Nepodařilo se odeslat" }
-        } else {
-          return response.json()
+    if (!response.isError) {
+      if (formData.get('action') === 'getThumbnailData'){  //zpracuj nahled dokumentu
+        let imageContent = '';
+        const bytes = new Uint8Array( response.adminData.thumbnailData );
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+          imageContent += String.fromCharCode( bytes[ i ] );
         }
-      })
-      .then((responseData) => {
-        //  console.log(responseData);
-        setResponseMessage(responseData.message);
-
-        if (formData.get('action') === 'getThumbnailData'){  //zpracuj nahled dokumentu
-          let imageContent = '';
-          const bytes = new Uint8Array( responseData.adminData.thumbnailData );
-          const len = bytes.byteLength;
-          for (let i = 0; i < len; i++) {
-            imageContent += String.fromCharCode( bytes[ i ] );
-          }
-          setImageThumbnailData( btoa(imageContent) );
+        setImageThumbnailData( window.btoa(imageContent) );
+      }
+      else {
+        if (response.adminData.partnerList) {
+          setPartnerDataAll(response.adminData.partnerList);
+          setPartnerData(response.adminData.partnerList);
         }
-        else {
-          if (responseData.adminData.partnerList) {
-            setPartnerDataAll(responseData.adminData.partnerList);
-            setPartnerData(responseData.adminData.partnerList);
-          }
-          let rows = [];
-          //  naplnit seznam dokumentu
-          if (responseData.adminData.documentList) {
-            responseData.adminData.documentList.forEach(function (row){
-              rows.push( {
-                  fileId:         row.fileId,
-                  type:           row.type, 
-                  name:           row.name, 
-                  issueDate:      row.issueDate,
-                  expireDate:     row.expireDate,
-                  description:    row.description,
-                  partnerName:    (row.partnerName === undefined ? '' : row.partnerName),
-                  orderName:      (row.orderName === undefined ? '' : row.orderName),
-                  typeText:       getDocumentTypeText(row.type),
-                  issueDateText:  connection.formatDate(row.issueDate, 'D'),
-                  expireDateText: connection.formatDate(row.expireDate, row.type)
-                }
-              )
-            })
-          }
-          setDocumentListAll({...documentListAll, rows});
-          filterDocumentList(documentListFilter, rows);
+        let rows = [];
+        //  naplnit seznam dokumentu
+        if (response.adminData.documentList) {
+          response.adminData.documentList.forEach(function (row){
+            rows.push( {
+                fileId:         row.fileId,
+                type:           row.type, 
+                name:           row.name, 
+                issueDate:      row.issueDate,
+                expireDate:     row.expireDate,
+                description:    row.description,
+                partnerName:    (row.partnerName === undefined ? '' : row.partnerName),
+                orderName:      (row.orderName === undefined ? '' : row.orderName),
+                typeText:       getDocumentTypeText(row.type),
+                issueDateText:  connection.formatDate(row.issueDate, 'D'),
+                expireDateText: connection.formatDate(row.expireDate, row.type)
+              }
+            )
+          })
         }
-        setLoading(false);
-        if (responseData.message.length > 0 /*&& formData.get('action') === 'submitForm'*/)  //  zobrazit vysledek volani DB - responseMessage
-          submitAlertMessage.current.click();
-      })
-      .catch((e) => {
-        console.log(e.message)
-        setLoading(false);
-        setError(true);
-        setResponseMessage("Kritická chyba: "+ e.message);
-        submitAlertMessage.current.click();
-      })
+        setDocumentListAll({...documentListAll, rows});
+        filterDocumentList(documentListFilter, rows);
+      }
+    }
+    setLoading(false);
+    if (response && response.responseMessage && response.responseMessage.length > 0)  //  zobrazit vysledek volani DB - responseMessage
+      submitAlertMessage.current.click();
   }
 
 //  -------------------------------------------------------------------------------
@@ -474,7 +450,7 @@ function Administrace()
         delay={2000}
       >
         {responseMessage}
-      </MDBAlert>
+    </MDBAlert>
     </>
   )
 }

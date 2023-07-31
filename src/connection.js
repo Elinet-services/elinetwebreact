@@ -1,18 +1,13 @@
-exports.getConnectionUrl = getConnectionUrl;
-exports.getToken         = getToken;
 exports.getOperatorLevel = getOperatorLevel;
 exports.getUserName     = getUserName;
 exports.getPartnerName  = getPartnerName;
 exports.setCookies      = setCookies;
 exports.resetCookies    = resetCookies;
 exports.formatDate      = formatDate;
+exports.processRequest  = processRequest;
 
-const url = "https://script.google.com/macros/s/AKfycbyRnV8Q5Q6J8F9irrs4PnpmP8bKepOJ37jssRWh5KRug2Rt8_TZV5Y-7q02IPIRbi0DWg/exec";
+const serverURL = "https://script.google.com/macros/s/AKfycbyoGYiBQKNO-ukEWxrgz8nrotX9S624kx_KtDQnar_1ZuIgqtFNseO0F3e7sdgDp0tQDw/exec";
 const cookieTimeout = 60;   //  platnost cookie v minutach
-
-function getConnectionUrl () {
-    return url;
-}
 
 function getToken() {
     return getCookie('token');
@@ -84,4 +79,46 @@ function formatDate(aDate, aDocumentType) {
         dateString = parseInt(aDate.substring(lastDot + 1)) +'.'+ parseInt(aDate.substring(firstDot + 1, lastDot)) +'.'+ aDate.substring(0, firstDot);
     }
     return dateString;
+}
+
+//  -------------------------------------------------------------------------------
+async function processRequest(formData)
+{
+    let isError = false;
+    let responseMessage = '';
+    let adminData = {};
+
+    formData.append("source", window.location.pathname.substring(1));
+    formData.append("token", getToken());
+    
+    await fetch(serverURL, {
+        method: "POST",
+        body: formData
+    })
+    .then((response) => {
+        /* if (response.status === 401) {
+            navigate('/login');
+        } */
+
+        if (response.ok) {
+            return response.json()
+        } else {
+            isError = true;
+            return { message: "Požadavek se nepodařilo odeslat" }
+        }
+    })
+    .then((responseData) => {
+        console.log(responseData);
+        isError         = responseData.isError;
+        responseMessage = responseData.message;
+        adminData       = responseData.adminData;
+    })
+    .catch((e) => {
+        console.log(e.message)
+        isError = true;
+        responseMessage = "Kritická chyba: "+ e.message;
+    
+    })
+
+    return {"responseMessage": responseMessage, "isError": isError, "adminData": adminData };
 }

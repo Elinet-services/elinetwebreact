@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useRef } from "react"
 import { Outlet } from "react-router-dom"
 import {
   MDBNavbar,
@@ -17,11 +17,17 @@ import {
   MDBFooter,
   MDBRow,
   MDBCol,
+  MDBBtn, MDBModal, MDBModalDialog, MDBModalContent, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBAlert, MDBSpinner
 } from "mdb-react-ui-kit"
 import connection from './connection.js';
 
 
-function MainMenu() {
+export default function MainMenu() {
+  const submitAlertMessage = useRef(null);        //  zobrazeni responseMessage v MDBAlertu po volani DB
+  const [loading, setLoading] = useState(false);  //  volani do DB
+  const [error, setError] = useState(false);      //  volani do DB vratilo chybu
+  const [responseMessage, setResponseMessage] = useState(''); //  textova zprava volani do DB
+
   const [showBasic, setShowBasic] = useState(false);
 
   function getActiveMenu(aMenuItem) {
@@ -29,6 +35,30 @@ function MainMenu() {
     else return "px-3"
   }
 
+  //  -------------------------------------------------------------------------------
+  //  Logout
+  async function Logout()
+  {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('action', 'logout');
+
+    let response = await connection.processRequest(formData);
+    setError(response.isError);
+    setResponseMessage (response.responseMessage);
+
+    if (!response.isError) {
+      connection.resetCookies();
+      setTimeout(() => {
+        window.location.replace('/');
+      }, 2000);
+    }
+    setLoading(false);
+    if (response && response.responseMessage && response.responseMessage.length > 0)  //  zobrazit vysledek volani DB - responseMessage
+      submitAlertMessage.current.click();
+  } //  Logout
+
+  //  -------------------------------------------------------------------------------
   function renderUserInfo()
   {
     return (
@@ -52,10 +82,11 @@ function MainMenu() {
           </MDBRow>
         </MDBContainer>                          
       </MDBDropdownItem>
-    )
-  }
-
-  return (
+    ) 
+  } //  renderUserInfo  
+  
+  //  -------------------------------------------------------------------------------
+  return (  //  ManiMenu
     <>
       <MDBNavbar
         fixed="botom"
@@ -127,7 +158,7 @@ function MainMenu() {
                         <MDBDropdownItem link href="/administrace">Administrace</MDBDropdownItem>
                         <MDBDropdownItem link href="/register">Registrace</MDBDropdownItem>
                         <MDBDropdownItem divider/>
-                        <MDBDropdownItem link href="/logout">Odhlášení</MDBDropdownItem>
+                        <MDBDropdownItem link onClick={Logout}>Odhlášení</MDBDropdownItem>
                       </MDBDropdownMenu>
                     : 
                       <MDBDropdownMenu>
@@ -135,7 +166,7 @@ function MainMenu() {
                         <MDBDropdownItem divider/>
                         <MDBDropdownItem link href="/orderlist">Seznam zakázek</MDBDropdownItem>
                         <MDBDropdownItem divider/>
-                        <MDBDropdownItem link href="/logout">Odhlášení</MDBDropdownItem>
+                        <MDBDropdownItem link onClick={Logout}>Odhlášení</MDBDropdownItem>
                       </MDBDropdownMenu>
                     }
                   </MDBDropdown>
@@ -147,12 +178,39 @@ function MainMenu() {
       </MDBNavbar>
 
       <Outlet />
+
+      {/* Odeslani do DB */}
+      <MDBModal show={loading} tabIndex='-1' staticBackdrop>
+          <MDBModalDialog size="lg">
+            <MDBModalContent>
+              <MDBModalHeader>
+                <MDBModalTitle>Odesílání do DB</MDBModalTitle>
+              </MDBModalHeader>
+              <MDBModalBody>
+                <div className='text-center'>
+                  <MDBSpinner role='status'/>
+                </div>
+              </MDBModalBody>
+            </MDBModalContent>
+          </MDBModalDialog>
+        </MDBModal>
+        {/* zobrazeni responseMessage */}
+        <MDBBtn className='visually-hidden' ref={submitAlertMessage}/>
+        <MDBAlert triggerRef={submitAlertMessage}
+            color={error ? 'danger':'success'}
+            autohide appendToBody
+            position='top-center'
+            width={800}
+            offset={50}
+            delay={2000}
+          >
+            {responseMessage}
+        </MDBAlert>      
     </>
   )
-}
+} //  MainMenu
 
-export default MainMenu
-
+  //  -------------------------------------------------------------------------------
 export function mainFooter(params) {
   return (
     <MDBFooter
@@ -255,4 +313,4 @@ export function mainFooter(params) {
       </div>
     </MDBFooter>
   )
-}
+} //  mainFooter
