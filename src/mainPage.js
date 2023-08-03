@@ -7,20 +7,20 @@ import {
   MDBRow,
   MDBCol,
 } from "mdb-react-ui-kit"
+import "./mainPage.css" // Importujeme externí CSS soubor pro stylování
 
 function mainPage() {
   return (
     <>
       <MDBRow className="bg-light mb-3">
         <MDBCol>
-          <MDBCard className="h-100">
-            <a href="./network">
-              <MDBCardImage
-                src="images/officesm.png"
-                position="top"
-                alt="IT řešení"
-              />
-            </a>
+          <MDBCard className="h-100 d-flex flex-row align-items-start">
+            <MDBCardImage
+              src="images/officesm.png"
+              position="top"
+              alt="IT řešení"
+              className="w-33" // Zde nastavujeme, aby obrázek zabíral 1/3 šířky
+            />
             <MDBCardBody>
               <MDBCardTitle>
                 <a href="./network" className="text-reset">
@@ -36,16 +36,10 @@ function mainPage() {
             </MDBCardBody>
           </MDBCard>
         </MDBCol>
+      </MDBRow>
+      <MDBRow className="bg-light mb-3">
         <MDBCol>
-          <MDBCard className="h-100">
-            <a href="./solar" className="text-reset">
-              <MDBCardImage
-                src="images/photoii.png"
-                position="top"
-                alt="Solární elektárny"
-                href="./solar"
-              />
-            </a>
+          <MDBCard className="h-100 d-flex flex-row align-items-start">
             <MDBCardBody>
               <MDBCardTitle>
                 <a href="./solar" className="text-reset">
@@ -64,17 +58,24 @@ function mainPage() {
                 analýzy proveditelnosti daného objektu.
               </MDBCardText>
             </MDBCardBody>
+            <MDBCardImage
+              src="images/photoii.png"
+              position="top"
+              alt="Solární elektárny"
+              className="w-33" // Zde nastavujeme, aby obrázek zabíral 1/3 šířky
+            />
           </MDBCard>
         </MDBCol>
+      </MDBRow>
+      <MDBRow className="bg-light mb-3">
         <MDBCol>
-          <MDBCard className="h-100">
-            <a href="./security">
-              <MDBCardImage
-                src="images/homesecurityi.png"
-                position="top"
-                alt="Zabezpečení"
-              />
-            </a>
+          <MDBCard className="h-100 d-flex flex-row align-items-start">
+            <MDBCardImage
+              src="images/homesecurityi.png"
+              position="top"
+              alt="Zabezpečení"
+              className="w-33" // Zde nastavujeme, aby obrázek zabíral 1/3 šířky
+            />
             <MDBCardBody>
               <MDBCardTitle>
                 <a href="./security" className="text-reset">
@@ -87,34 +88,6 @@ function mainPage() {
               </MDBCardText>
             </MDBCardBody>
           </MDBCard>
-        </MDBCol>
-      </MDBRow>
-      <MDBRow className="mb-4">
-        <MDBCol>
-          Elinet services je ideální partner pro správu a provoz IT malých a
-          středních společností. Snažíme se společnostem dodat taková IT řešení,
-          o která není třeba neustále pečovat. Proto svá řešení stavíme hlavně
-          na následujících technologiích a komponentech:
-          <ul>
-            <li>
-              Google Workplace – komplexní firemní řešení, které zajistí mailové
-              schránky pro celou firmu, umožní vytvoření webových stránek
-              společnosti jejichž součástí je mimo jiné i plně funkční náhrada
-              Microsoft Office včetně velkých sdílených disků.
-            </li>
-            <li>Mikrotik a Cisco systémy pro sítě a wifi připojení</li>
-            <li>
-              Vývoj aplikací nad MS Excel a Google Spreadsheet prostřednictvím
-              vývojového nástroje Appsheet.{" "}
-            </li>
-          </ul>
-        </MDBCol>
-        <MDBCol>
-          Zajišťuje i další specializovaná řešení související s byznysem
-          zákazníka. Jedná se například o nasazení interní podnikové telefone,
-          wifi hotspoty pro penziony, hotely ale i autoprodejny atp. Obecně se
-          snažíme, aby zákazník měl IT, které pokrývá jeho potřeby a nepotřebuje
-          neustálý dohled.
         </MDBCol>
       </MDBRow>
     </>
