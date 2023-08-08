@@ -1,42 +1,36 @@
-exports.getOperatorLevel = getOperatorLevel;
-exports.getUserName     = getUserName;
-exports.getPartnerName  = getPartnerName;
-exports.setCookies      = setCookies;
-exports.resetCookies    = resetCookies;
-exports.formatDate      = formatDate;
-exports.processRequest  = processRequest;
-
-const serverURL = "https://script.google.com/macros/s/AKfycbyoGYiBQKNO-ukEWxrgz8nrotX9S624kx_KtDQnar_1ZuIgqtFNseO0F3e7sdgDp0tQDw/exec";
+const serverURL = "https://script.google.com/macros/s/AKfycbyOtXaZ8te04sVpe4__9rpa0TWT2OdYds1GFD5JQD0uXNDfOd-5GXWxAdOZmXcMRZaE2g/exec";
 const cookieTimeout = 60;   //  platnost cookie v minutach
 
-function getToken() {
-    return getCookie('token');
-}
-function getOperatorLevel() {   //  N - none; U - User; A - Admin
+export function getOperatorLevel() {   //  N - none; U - User; A - Admin
     let operatorLevel = getCookie('operatorLevel');
     if (operatorLevel.length === 0)
         operatorLevel = 'N';
     return operatorLevel;
 }
-function getUserName () {
+export function getUserName () {
     return getCookie('userName');
 }
-function getPartnerName () {
+export function getPartnerName () {
     return getCookie('partnerName');
 }
 
-function setCookies(connection) {
+export function setCookies(connection) {
     setCookie('token', connection.token);
     setCookie('operatorLevel', connection.operatorLevel);
     setCookie('userName', connection.userName);
     setCookie('partnerName', connection.partnerName);
 }
 
-function resetCookies() {
+export function resetCookies() {
+    console.log('resetCookies');
     deleteCookie('token');
     deleteCookie('operatorLevel');
     deleteCookie('userName');
-    deleteCookie('partnerName');    
+    deleteCookie('partnerName');
+}
+
+function getToken() {
+    return getCookie('token');
 }
 
 function setCookie(aName, aValue) {
@@ -69,7 +63,7 @@ function deleteCookie(aName)
 
 //  -------------------------------------------------------------------------------
 //  preformatuje datum z DB k zobrazeni v prehledu
-function formatDate(aDate, aDocumentType) {
+export function formatDate(aDate, aDocumentType) {
     let dateString = '';
     if (aDocumentType === 'D' && aDate != null) {
         const firstDot = aDate.indexOf('-');
@@ -82,15 +76,20 @@ function formatDate(aDate, aDocumentType) {
 }
 
 //  -------------------------------------------------------------------------------
-async function processRequest(formData)
+export default async function processRequest(formData, source, setLoading, setMessage, setError, submitAlertMessage)
 {
+    setLoading(true);
     let isError = false;
     let responseMessage = '';
     let adminData = {};
 
-    formData.append("source", window.location.pathname.substring(1));
+    formData.append("source", source);
     formData.append("token", getToken());
-    
+
+    /* for (const pair of formData.entries()) {
+      console.log(pair[0] +', '+ pair[1]);
+    } */
+
     await fetch(serverURL, {
         method: "POST",
         body: formData
@@ -119,6 +118,11 @@ async function processRequest(formData)
         responseMessage = "Kritická chyba: "+ e.message;
     
     })
+    setMessage(responseMessage);
+    setError(isError);
+    setLoading(false);
+    if (responseMessage.length > 0)  //  zobrazit vysledek volani DB - responseMessage
+        submitAlertMessage.current.click();
 
-    return {"responseMessage": responseMessage, "isError": isError, "adminData": adminData };
+    return {"isError": isError, "adminData": adminData };
 }

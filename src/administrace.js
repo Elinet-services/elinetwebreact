@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect} from "react";
 
 import {
   MDBCard, MDBCardBody, MDBContainer,
@@ -18,21 +18,12 @@ import {
   MDBPopconfirmMessage,
   MDBAutocomplete,
   MDBSpinner,
-  MDBAlert,
   MDBBtnGroup, MDBRadio
 } from 'mdb-react-ui-kit';
-import connection from './connection.js';
-//import { MDBTreeTable, MDBTreeTableItem, MDBTreeTableHead, MDBTreeTableBody } from 'mdb-react-treetable';
-//import "mdb-react-treetable/dist/css/treetable.min.css"
+import processRequest, {formatDate} from './connection.js';
 
-
-function Administrace()
+function Administrace(params)
 {
-  const submitAlertMessage = useRef(null);        //  zobrazeni responseMessage v MDBAlertu po volani DB
-  const [loading, setLoading] = useState(false);  //  volani do DB
-  const [error, setError] = useState(false);      //  volani do DB vtratilo chybu
-  const [responseMessage, setResponseMessage] = useState(''); //  textova zprava volani do DB
-
   const [showDocumentDetail, setShowDocumentDetail] = useState(false);  //  priznak, zobrazit detail dokumentu
   const [imageThumbnailData, setImageThumbnailData] = useState('');     //  obrazek nahledu dokumentu
   const [documentListFilter, setDocumentListFilter] = useState('N');    //  vyber filtru Ne/Zarazene/Vse
@@ -69,7 +60,7 @@ function Administrace()
     const loadData = () => {
       const formData = new FormData();
       formData.append("action", 'loadData');
-      processRequest(formData);
+      callDB(formData);
     };
 
     loadData();
@@ -138,18 +129,19 @@ function Administrace()
     setOrderData(orderDataAll.filter((item) => item.orderName.toLowerCase().startsWith(value.toLowerCase())));
   }
 
+  //  pokud nechci zobrazit Loading do DB
+  function setLoadingLocal(){}
+
   //  -------------------------------------------------------------------------------
   //  odesle data do DB
-  async function processRequest(formData)
+  async function callDB(formData)
   {
-    if (formData.get('action') !== 'getThumbnailData')
-      setLoading(true);
-    setError(false);
-    setResponseMessage('');
+    let setLoading = params.setLoading;
 
-    let response = await connection.processRequest(formData);
-    setError(response.isError);
-    setResponseMessage (response.responseMessage);
+    if (formData.get('action') === 'getThumbnailData')
+      setLoading = setLoadingLocal;
+
+    let response = await processRequest(formData, 'administrace', setLoading, params.setMessage, params.setError, params.submitAlertMessage);
 
     if (!response.isError) {
       if (formData.get('action') === 'getThumbnailData'){  //zpracuj nahled dokumentu
@@ -180,8 +172,8 @@ function Administrace()
                 partnerName:    (row.partnerName === undefined ? '' : row.partnerName),
                 orderName:      (row.orderName === undefined ? '' : row.orderName),
                 typeText:       getDocumentTypeText(row.type),
-                issueDateText:  connection.formatDate(row.issueDate, 'D'),
-                expireDateText: connection.formatDate(row.expireDate, row.type)
+                issueDateText:  formatDate(row.issueDate, 'D'),
+                expireDateText: formatDate(row.expireDate, row.type)
               }
             )
           })
@@ -190,9 +182,6 @@ function Administrace()
         filterDocumentList(documentListFilter, rows);
       }
     }
-    setLoading(false);
-    if (response && response.responseMessage && response.responseMessage.length > 0)  //  zobrazit vysledek volani DB - responseMessage
-      submitAlertMessage.current.click();
   }
 
 //  -------------------------------------------------------------------------------
@@ -208,7 +197,7 @@ function Administrace()
       console.log(key +' - '+ documentFormValue[key])
     }
     toggleShowDocumentDetail();
-    processRequest(formData);
+    callDB(formData);
   }
   //  nacteni nahledu dokumentu
   function getThumbnailData(fileId)
@@ -217,7 +206,7 @@ function Administrace()
     formData.append("action", 'getThumbnailData');
     formData.append("fileId", fileId);
     setImageThumbnailData('');
-    processRequest(formData);
+    callDB(formData);
   }
   //  odstraneni souboru
   function onClickDocumentDelete ()
@@ -226,7 +215,7 @@ function Administrace()
     formData.append("action", 'deleteFile');
     formData.append("fileId", documentFormValue.fileId);
     toggleShowDocumentDetail();
-    processRequest(formData);
+    callDB(formData);
   }
   //  -------------------------------------------------------------------------------
   //  FILTROVANI Ne/Zarazene/Vse
@@ -248,7 +237,7 @@ function Administrace()
   //  H L A V N I   B L O K
   //  -------------------------------------------------------------------------------
   return (
-    <>
+  <>
     <MDBContainer className="py-5">
       <MDBRow>
         {/* SEZNAM DOKUMENTU */}
@@ -422,36 +411,7 @@ function Administrace()
         </MDBModalContent>
       </MDBModalDialog>
     </MDBModal>
-
-    {/* Odeslani do DB */}
-    <MDBModal show={loading} tabIndex='-1' staticBackdrop>
-      <MDBModalDialog size="lg">
-        <MDBModalContent>
-          <MDBModalHeader>
-            <MDBModalTitle>Odesílání do DB</MDBModalTitle>
-          </MDBModalHeader>
-          <MDBModalBody>
-            <div className='text-center'>
-              <MDBSpinner role='status'/>
-            </div>
-          </MDBModalBody>
-        </MDBModalContent>
-      </MDBModalDialog>
-    </MDBModal>
-
-    {/* zobrazeni responseMessage */}
-    <MDBBtn className='visually-hidden' ref={submitAlertMessage}/>
-    <MDBAlert triggerRef={submitAlertMessage}
-        color={error ? 'danger':'primary'}
-        autohide appendToBody
-        position='top-center'
-        width={800}
-        offset={50}
-        delay={2000}
-      >
-        {responseMessage}
-    </MDBAlert>
-    </>
+  </>
   )
 }
 // 

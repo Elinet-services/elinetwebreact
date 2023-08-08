@@ -9,7 +9,7 @@ import {
 
 import ContactForm from "./form"
 
-function aboutPage() {
+function aboutPage(params) {
   return (
     <MDBCard>
       <MDBCardImage
@@ -29,7 +29,7 @@ function aboutPage() {
             </MDBRow>
           </MDBCol>
           <MDBCol md={3}>
-            <ContactForm />
+            <ContactForm source={'about'} setLoading={params.setLoading} setMessage={params.setMessage} setError={params.setError} submitAlertMessage={params.submitAlertMessage}/>
           </MDBCol>
         </MDBRow>
       </MDBCardBody>

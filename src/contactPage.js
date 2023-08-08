@@ -9,7 +9,7 @@ import {
 
 import ContactForm from "./form"
 
-function contactPage() {
+function contactPage(params) {
   return (
     <MDBCard>
       <MDBCardImage
@@ -30,7 +30,7 @@ function contactPage() {
             </MDBRow>
           </MDBCol>
           <MDBCol md={3}>
-            <ContactForm />
+            <ContactForm source={'contact'} setLoading={params.setLoading} setMessage={params.setMessage} setError={params.setError} submitAlertMessage={params.submitAlertMessage}/>
           </MDBCol>
         </MDBRow>
       </MDBCardBody>

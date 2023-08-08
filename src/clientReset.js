@@ -1,19 +1,11 @@
-import { useState, useRef } from "react";
-import { MDBInput, MDBBtn, MDBCard, MDBCardBody, MDBCardText,
-  MDBModal, MDBModalDialog, MDBModalContent, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBAlert, MDBSpinner
- } from "mdb-react-ui-kit"
-import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { MDBInput, MDBBtn, MDBCard, MDBCardBody, MDBCardText } from "mdb-react-ui-kit"
 
 import { sha256 } from "node-forge";
-import connection from './connection.js';
+import processRequest from './connection.js';
 
-function ClientReset() {
-    const submitAlertMessage = useRef(null);        //  zobrazeni responseMessage v MDBAlertu po volani DB
-    const [loading, setLoading] = useState(false);  //  volani do DB
-    const [error, setError] = useState(false);
-    const [responseMessage, setResponseMessage] = useState();
-
-    let { token } = useParams();  //  token v URL
+function ClientReset(params) {
+    const resetToken = params.resetToken;
     const [formValue, setFormValue] = useState({
         password: "",
         rePassword: ""
@@ -42,35 +34,31 @@ function ClientReset() {
     async function Submit(e)
     {
       e.preventDefault();
-      setLoading(true);
 
       const form = document.getElementById("resetForm");
       const formData = new FormData(form);
-      //  token = token + g + hexEncode(email)
-      const sha = sha256.create().update(hexDecode(token.substring(token.indexOf('g')+ 1 )) + formData.get("password"));
+      //  token = resetToken + g + hexEncode(email)
+      const sha = sha256.create().update(hexDecode(resetToken.substring(resetToken.indexOf('g')+ 1 )) + formData.get("password"));
 
       formData.delete("rePassword");
       formData.set("password", sha.digest().toHex());
-      formData.append("resetToken", token.substring(0, token.indexOf('g')));
+      formData.append("resetToken", resetToken.substring(0, resetToken.indexOf('g')));
 
-      let response = await connection.processRequest(formData);
-      setError(response.isError);
-      setResponseMessage (response.responseMessage);
+      let response = await processRequest(formData, 'resetPassword', params.setLoading, params.setMessage, params.setError, params.submitAlertMessage);
   
       if (!response.isError) {
         setFormValue({ password: "", rePassword: "" })
         form.reset();
+        setTimeout(() => {
+          params.setPage('login');
+        }, 2000);
       }
-      setLoading(false);
-      if (response && response.responseMessage && response.responseMessage.length > 0)  //  zobrazit vysledek volani DB - responseMessage
-        submitAlertMessage.current.click();
     }
     return (
-    <>
       <section className="d-flex justify-content-center">
           <MDBCard>
               <MDBCardBody>
-                  <MDBCardText>Registrační formulář</MDBCardText>
+                  <MDBCardText>Reset hesla</MDBCardText>
                   <form onSubmit={(e) => Submit(e)} id="resetForm" >
                       <MDBInput
                           name="password"
@@ -99,34 +87,6 @@ function ClientReset() {
               </MDBCardBody>
           </MDBCard>
       </section>
-      {/* Odeslani do DB */}
-      <MDBModal show={loading} tabIndex='-1' staticBackdrop>
-        <MDBModalDialog size="lg">
-          <MDBModalContent>
-            <MDBModalHeader>
-              <MDBModalTitle>Odesílání do DB</MDBModalTitle>
-            </MDBModalHeader>
-            <MDBModalBody>
-              <div className='text-center'>
-                <MDBSpinner role='status'/>
-              </div>
-            </MDBModalBody>
-          </MDBModalContent>
-        </MDBModalDialog>
-      </MDBModal>
-      {/* zobrazeni responseMessage */}
-      <MDBBtn className='visually-hidden' ref={submitAlertMessage}/>
-      <MDBAlert triggerRef={submitAlertMessage}
-          color={error ? 'danger':'success'}
-          autohide appendToBody
-          position='top-center'
-          width={800}          
-          offset={150}
-          delay={3000}
-        >
-          {responseMessage}
-      </MDBAlert>
-    </>
   )
 }
 

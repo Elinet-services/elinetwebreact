@@ -10,7 +10,6 @@ code {
     monospace;
 }
 
-
 div .formHead {
   background-color: #82CE2B;
   color: white;
@@ -36,4 +35,7 @@ div .formHead {
 li.autocomplete-no-results {
   font-size: 0.9rem;
   font-style: italic;
+}
+.navbar-nav .active a.nav-link {
+  color: var(--mdb-navbar-active-color);
 }

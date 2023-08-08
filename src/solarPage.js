@@ -9,7 +9,7 @@ import {
 
 import ContactForm from "./form"
 
-function solarPage() {
+function solarPage(params) {
   return (
     <MDBCard>
       <MDBCardImage
@@ -64,7 +64,7 @@ function solarPage() {
             </MDBRow>
           </MDBCol>
           <MDBCol md={4}>
-            <ContactForm />
+            <ContactForm source={'solar'} setLoading={params.setLoading} setMessage={params.setMessage} setError={params.setError} submitAlertMessage={params.submitAlertMessage}/>
           </MDBCol>
         </MDBRow>
       </MDBCardBody>

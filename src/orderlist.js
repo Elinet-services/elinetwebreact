@@ -1,30 +1,14 @@
-import { useState, useEffect, useRef } from "react";
-
+import { useState, useEffect } from "react";
 import {
   MDBCard, MDBCardBody, MDBContainer,
   MDBDatatable, 
   MDBRow,
-  MDBCol,
-  MDBBtn,
-  MDBModal,
-  MDBModalDialog,
-  MDBModalContent,
-  MDBModalHeader,
-  MDBModalTitle,
-  MDBModalBody,
-  MDBSpinner,
-  MDBAlert,
+  MDBCol
 } from 'mdb-react-ui-kit';
-import connection from './connection.js';
+import processRequest, {formatDate} from './connection.js';
 
-
-function OrderList()
+function OrderList(params)
 {
-  const submitAlertMessage = useRef(null);        //  zobrazeni responseMessage v MDBAlertu po volani DB
-  const [loading, setLoading] = useState(false);  //  volani do DB
-  const [error, setError] = useState(false);      //  volani do DB vtratilo chybu
-  const [responseMessage, setResponseMessage] = useState(''); //  textova zprava volani do DB
-
   const [documentTypeList, setDocumentTypeList] = useState([
     {value: '', text: '' },
     {value: 'FP', text: 'Faktura přijatá', defaultSelected: false},
@@ -73,16 +57,10 @@ function OrderList()
   //  odesle data do DB
   async function loadData()
   {
-    setLoading(true);
-    setError(false);
-    setResponseMessage('');
-
     const formData = new FormData();
     formData.append("action", 'loadData');
 
-    let response = await connection.processRequest(formData);
-    setError(response.isError);
-    setResponseMessage (response.responseMessage);
+    let response = await processRequest(formData, 'orderlist', params.setLoading, params.setMessage, params.setError, params.submitAlertMessage);
 
     if (!response.isError) {
       //  naplnit prehled zakazek
@@ -104,8 +82,8 @@ function OrderList()
               expireDate:     document.expireDate,
               description:    document.description,
               typeText:       getDocumentTypeText(document.type),
-              issueDateText:  connection.formatDate(document.issueDate, 'D'),
-              expireDateText: connection.formatDate(document.expireDate, document.type)
+              issueDateText:  formatDate(document.issueDate, 'D'),
+              expireDateText: formatDate(document.expireDate, document.type)
             });
           })
           if (orders.length === 0)  //  naplneni pro 1. zakazku
@@ -118,16 +96,12 @@ function OrderList()
       }
       setOrderList({...orderList, rows: orders});         
     }
-    setLoading(false);
-    if (response && response.responseMessage && response.responseMessage.length > 0)  //  zobrazit vysledek volani DB - responseMessage
-      submitAlertMessage.current.click();
   }
 
   //  -------------------------------------------------------------------------------
   //  H L A V N I   B L O K
   //  -------------------------------------------------------------------------------
   return (
-    <>
     <MDBContainer className="py-5">
       <MDBRow>
         {/* SEZNAM ZAKAZEK */}
@@ -177,36 +151,7 @@ function OrderList()
         </MDBCol>
       </MDBRow>
     </MDBContainer>
-
-     {/* Odeslani do DB */}
-    <MDBModal show={loading} tabIndex='-1' staticBackdrop>
-      <MDBModalDialog size="lg">
-        <MDBModalContent>
-          <MDBModalHeader>
-            <MDBModalTitle>Odesílání do DB</MDBModalTitle>
-          </MDBModalHeader>
-          <MDBModalBody>
-            <div className='text-center'>
-              <MDBSpinner role='status'/>
-            </div>
-          </MDBModalBody>
-        </MDBModalContent>
-      </MDBModalDialog>
-    </MDBModal>
-    {/* zobrazeni responseMessage */}
-    <MDBBtn className='visually-hidden' ref={submitAlertMessage}/>
-    <MDBAlert triggerRef={submitAlertMessage}
-        color={error ? 'danger':'success'}
-        autohide appendToBody
-        position='top-center'
-        width={800}
-        offset={50}
-        delay={2000}
-      >
-        {responseMessage}
-      </MDBAlert>
-    </>
   )
-}
+} //  OrderList
 
 export default OrderList;

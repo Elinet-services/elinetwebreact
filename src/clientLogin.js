@@ -1,25 +1,19 @@
-import { useState, useEffect, useRef } from "react";
-import {  MDBInput, MDBBtn, MDBCard, MDBCardBody, MDBCardText,
-          MDBModal, MDBModalDialog, MDBModalContent, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBSpinner, MDBAlert
-} from "mdb-react-ui-kit"
+import { useState, useEffect } from "react";
+import {  MDBInput, MDBBtn, MDBCard, MDBCardBody, MDBCardText } from "mdb-react-ui-kit"
 
 import { sha256 } from "node-forge";
-import connection from './connection.js';
+import processRequest, {setCookies, resetCookies} from './connection.js';
 
-function ClientLogin() {
-    const submitAlertMessage = useRef(null);        //  zobrazeni responseMessage v MDBAlertu po volani DB
-    const [loading, setLoading] = useState(false);  //  volani do DB
-    const [error, setError] = useState(false)       //  volani do DB vratilo chybu
-    const [responseMessage, setResponseMessage] = useState('')
-
+function ClientLogin(params) {
+    const [source, setSource] = useState('login');
     const [logged, setLogged] = useState(false)
     const [formValue, setFormValue] = useState({
         email: "",
         password: ""
     });
 
-  useEffect(() => {
-      connection.resetCookies();
+    useEffect(() => {
+      resetCookies();
     }, []);  
 
     const onChange = (e) => {
@@ -34,19 +28,16 @@ function ClientLogin() {
         }
     }
 
+//  -------------------------------------------------------------------------------
     async function Login(e)
     {
       e.preventDefault();
-      setLoading(true);
-      setError(false);
 
       const formData = new FormData(document.getElementById("loginForm"));
       const sha = sha256.create().update(formData.get("email").toLowerCase() + formData.get("password"));
       formData.set("password", sha.digest().toHex());
 
-      let response = await connection.processRequest(formData);
-      setError(response.isError);
-      setResponseMessage (response.responseMessage);
+      let response = await processRequest(formData, 'login', params.setLoading, params.setMessage, params.setError, params.submitAlertMessage);
 
       if (!response.isError) {
         setFormValue({ email: "", password: ""})
@@ -54,83 +45,92 @@ function ClientLogin() {
 
         if (response.adminData && response.adminData.connection) {
           setLogged(true);
-          connection.setCookies(response.adminData.connection);
-          setTimeout(() => {
-            window.location.replace('/');
-          }, 2000);
+          setCookies(response.adminData.connection);
+          //setTimeout(() => {
+          //  window.location.replace('/');
+          //}, 2000);
         }
       }
-      setLoading(false);
-      if (response && response.responseMessage && response.responseMessage.length > 0)  //  zobrazit vysledek volani DB - responseMessage
-        submitAlertMessage.current.click();
     }
-    
-  return (
-    <>
-    <section className={"d-flex justify-content-center"+ (logged ? ' visually-hidden':'')}>
+
+//  -------------------------------------------------------------------------------
+    async function Forgot(e)
+    {
+      e.preventDefault();
+  
+      const form = document.getElementById("forgotForm");
+      const formData = new FormData(form);
+      formData.set("email", formData.get("email").toLowerCase());
+  
+      let response = await processRequest(formData, 'forgot', params.setLoading, params.setMessage, params.setError, params.submitAlertMessage);
+  
+      if (!response.isError) {
+        setFormValue({ email: ""})
+        form.reset();    
+      }
+    }  
+
+//  -------------------------------------------------------------------------------
+return (
+  <>
+    {source === 'login' ? 
+      <section className={"d-flex justify-content-center"+ (logged ? ' visually-hidden':'')}>
+          <MDBCard>
+              <MDBCardBody>
+                  <MDBCardText>Přihlášení</MDBCardText>
+                  <form onSubmit={(e) => Login(e)} id="loginForm" >
+                      <MDBInput name="email" autoComplete="email"
+                          onChange={onChange}
+                          value={formValue.email}
+                          type="email"
+                          wrapperClass="mb-4"
+                          label="Email"
+                          required 
+                      />
+                      <MDBInput name="password" autoComplete="current-password"
+                          onChange={onChange}
+                          value={formValue.password}
+                          type="password"
+                          wrapperClass="mb-4"
+                          label="Heslo (min 8 znaků)"
+                          required
+                      />
+                      <MDBBtn type="submit" className="mb-4" block>
+                        Přihlásit
+                      </MDBBtn>
+                  </form>
+                  <MDBBtn color='link' onClick={() => setSource('forgot')}>
+                    Zapomenuté heslo
+                  </MDBBtn>
+              </MDBCardBody>
+          </MDBCard>
+      </section>
+    : 
+      <section className="d-flex justify-content-center">
         <MDBCard>
             <MDBCardBody>
-                <MDBCardText>Přihlášení</MDBCardText>
-                <form onSubmit={(e) => Login(e)} id="loginForm" >
-                    <MDBInput
-                        name="email"
-                        id="email"
-                        onChange={onChange}
-                        value={formValue.email}
-                        type="email"
-                        wrapperClass="mb-4"
-                        label="Email"
-                        required autoComplete="email"
-                    />
-                    <MDBInput
-                        name="password"
-                        id="password"
-                        onChange={onChange}
-                        value={formValue.password}
-                        type="password"
-                        wrapperClass="mb-4"
-                        label="Heslo (min 8 znaků)"
-                        required autoComplete="current-password"
-                    />
-
-                    <MDBBtn type="submit" className="mb-4" block>
-                        Přihlásit
-                    </MDBBtn>
-
-                    <a href="/forgot">Zapomenuté heslo</a>
-                </form>
+              <MDBCardText>Obnovení hesla</MDBCardText>
+              <form onSubmit={(e) => Forgot(e)} id="forgotForm" >
+                <MDBInput name="email" autoComplete="email"
+                    onChange={onChange}
+                    value={formValue.email}
+                    type="email"
+                    wrapperClass="mb-4"
+                    label="Email"
+                    required
+                />
+                <MDBBtn type="submit" className="mb-4" block>
+                    Obnovit
+                </MDBBtn>
+              </form>
+              <MDBBtn color='link' onClick={() => setSource('login')}>
+                Přihlaste se
+              </MDBBtn>
             </MDBCardBody>
         </MDBCard>
-    </section>
-
-    {/* Odeslani do DB */}
-    <MDBModal show={loading} tabIndex='-1' staticBackdrop>
-      <MDBModalDialog size="lg">
-        <MDBModalContent>
-          <MDBModalHeader>
-            <MDBModalTitle>Odesílání do DB</MDBModalTitle>
-          </MDBModalHeader>
-          <MDBModalBody>
-            <div className='text-center'>
-              <MDBSpinner role='status'/>
-            </div>
-          </MDBModalBody>
-        </MDBModalContent>
-      </MDBModalDialog>
-    </MDBModal>
-    {/* zobrazeni responseMessage */}
-    <MDBBtn className='visually-hidden' ref={submitAlertMessage}/>
-    <MDBAlert triggerRef={submitAlertMessage}
-        color={error ? 'danger':'success'}
-        autohide appendToBody
-        position='top-center'
-        width={800}
-        offset={50}
-        delay={2000}
-      >
-        {responseMessage}
-    </MDBAlert>
-    </>
+      </section>
+    }
+  </>
   )
 }
 
