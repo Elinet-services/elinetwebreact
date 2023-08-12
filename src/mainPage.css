@@ -1,0 +1,21 @@
+/* Styly pro obrázky v karetech */
+.card-image {
+    max-width: 33.33%;
+  }
+  
+  /* Styly pro text v karetech */
+  .card-text {
+    text-align: left;
+    font-size: 16px;
+    flex-grow: 1; /* Přidáno, aby textový blok vyplnil zbývající prostor */
+  }
+  
+  /* Styly pro kartu jako celek */
+  .card-content {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+  }
+  
+  /* Pokud je potřeba, můžete přidat další styly pro další úpravy */
+  

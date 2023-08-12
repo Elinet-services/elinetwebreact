@@ -24,10 +24,7 @@ function networkPage(params) {
           <MDBCol md={9}>
             <MDBRow className="mb-4">
               <MDBCardBody>
-                Zajišťujeme kompletní dodávku IT služeb pro společnosti od
-                návrhu, přes vývoj a následnou podporu. Při svých dodávkách se
-                zaměřujeme na zákaznická řešení postavená na komponentách
-                Google, Mikrotik a Cisco.{" "}
+                Zajišťujeme kompletní dodávku IT služeb pro společnosti, která zahrnuje návrh, vývoj a následnou podporu. Při svých dodávkách se zaměřujeme na zákaznická řešení, která jsou postavená na komponentách od renomovaných společností, jako jsou Google, Mikrotik a Cisco.
               </MDBCardBody>
             </MDBRow>
             <MDBRow>
@@ -36,40 +33,13 @@ function networkPage(params) {
                   <li>
                     <ul>
                       <li>
-                        Google Workspace pro zajištění základního fungování
-                        společnosti (email, sdílení dokumentů). Zároveň vyvíjeme
-                        aplikace v prostředí Google Apps Script.{" "}
+                        <strong>Google Workspace:</strong> Pro zajištění základního fungování společnosti, jako je email a sdílení dokumentů. Zároveň vyvíjíme aplikace v prostředí Google Apps Script, což umožňuje přizpůsobení a automatizaci procesů dle specifických potřeb.
                       </li>
                       <li>
-                        Mikrotik a Cisco pro zajištění kompletního řešení sítí.
-                        Většinu řešení stavíme na komponentách Mikrotik a pro
-                        korporátní klientelu dodáváme Cosco.
+                        <strong>Mikrotik a Cisco:</strong> Pro zajištění kompletního řešení sítí. Většinu řešení stavíme na komponentách Mikrotik, a pro korporátní klientelu preferujeme produkty od společnosti Cisco. 
                       </li>
                       <li>
-                        ReactJSD a MDB Bootstrap pro vývoj responsivních
-                        webových stránek a aplikací.
-                      </li>
-                    </ul>
-                  </li>
-                </MDBTypography>
-              </MDBCol>
-              <MDBCol>
-                <MDBTypography listUnStyled className="mb-0">
-                  <li>
-                    <ul>
-                      <li>
-                        Google Workspace pro zajištění základního fungování
-                        společnosti (email, sdílení dokumentů). Zároveň vyvíjeme
-                        aplikace v prostředí Google Apps Script.{" "}
-                      </li>
-                      <li>
-                        Mikrotik a Cisco pro zajištění kompletního řešení sítí.
-                        Většinu řešení stavíme na komponentách Mikrotik a pro
-                        korporátní klientelu dodáváme Cosco.
-                      </li>
-                      <li>
-                        ReactJSD a MDB Bootstrap pro vývoj responsivních
-                        webových stránek a aplikací.
+                        <strong>ReactJS a MDB Bootstrap:</strong> Pro vývoj responsivních webových stránek a aplikací. Tyto moderní technologie nám umožňují vytvářet vizuálně atraktivní a funkčně bohaté webové prezentace, které se přizpůsobují různým zařízením a velikostem obrazovek.
                       </li>
                     </ul>
                   </li>

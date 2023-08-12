@@ -6,8 +6,8 @@ import {
   MDBCardImage,
   MDBRow,
   MDBCol,
-} from "mdb-react-ui-kit"
-import "./mainPage.css"
+} from "mdb-react-ui-kit";
+import "./mainPage.css";
 
 function mainPage() {
   return (
@@ -29,14 +29,16 @@ function mainPage() {
                   </a>
                 </MDBCardTitle>
                 <MDBCardText>
-                  Naše odborná skupina nabízí komplexní IT služby, které
-                  pokrývají spektrum od návrhu přes vývoj až po neustálou
-                  podporu. Naše hluboké znalosti a zkušenosti v oblastech
-                  bankovnictví a telekomunikací nám umožňují přinášet inovativní
-                  přístupy do světa malých a středních podniků. S naším odborným
-                  know-how a zaměřením na zákaznická řešení, jsme připraveni
-                  poskytnout IT služby, které jsou přesně přizpůsobeny potřebám
-                  vaší firmy.
+                  Naše odborná skupina nabízí komplexní IT služby, které pokrývají
+                  spektrum od návrhu přes vývoj až po neustálou podporu. Naše hluboké
+                  znalosti a zkušenosti v oblastech bankovnictví a telekomunikací
+                  nám umožňují přinášet inovativní přístupy do světa malých a středních
+                  podniků. S naším odborným know-how a zaměřením na zákaznická řešení,
+                  jsme připraveni poskytnout IT služby, které jsou přesně přizpůsobeny
+                  potřebám vaší firmy.
+                </MDBCardText>
+                <MDBCardText>
+                  <a href="./network" className="learn-more">Dozvědět se více</a>
                 </MDBCardText>
               </MDBCardBody>
             </div>
@@ -66,8 +68,11 @@ function mainPage() {
                   spokojenosti. Naše nabídka zahrnuje různé typy solárních
                   systémů, od střešních tašek až po panely a fasády, které lze
                   integrovat s dalšími technologiemi pro maximalizaci účinnosti.
-                  Náš podrobný návrh je navržen tak, aby splnil všechny
-                  požadavky pro schválení u distribuční sítě a získání dotací.
+                  Náš podrobný návrh je navržen tak, aby splnil všechny požadavky
+                  pro schválení u distribuční sítě a získání dotací.
+                </MDBCardText>
+                <MDBCardText>
+                  <a href="./solar" className="learn-more">Dozvědět se více</a>
                 </MDBCardText>
               </MDBCardBody>
             </div>
@@ -94,14 +99,16 @@ function mainPage() {
                 <MDBCardText>
                   Náš tým odborníků nabízí pružné, inovativní řešení v oblasti
                   zabezpečení a automatizace pro domácnosti a menší kancelářské
-                  prostory. Naše rozsáhlé IT znalosti a zkušenosti z
-                  implementace bezpečnostních a evakuačních systémů nám umožňují
-                  vytvářet systémy, které lze v budoucnu jednoduše upravovat a
-                  rozšiřovat. S naším individuálním přístupem se každá zakázka
-                  těší maximální péči, což zajišťuje vysokou kvalitu našich
-                  dodávek a pravidelný servis. Po důkladné analýze vašich potřeb
-                  vytvoříme řešení na míru, které po schválení zrealizujeme pro
-                  vaše maximální pohodlí a efektivitu.
+                  prostory. Naše rozsáhlé IT znalosti a zkušenosti z implementace
+                  bezpečnostních a evakuačních systémů nám umožňují vytvářet systémy,
+                  které lze v budoucnu jednoduše upravovat a rozšiřovat. S naším
+                  individuálním přístupem se každá zakázka těší maximální péči, což
+                  zajišťuje vysokou kvalitu našich dodávek a pravidelný servis. Po
+                  důkladné analýze vašich potřeb vytvoříme řešení na míru, které po
+                  schválení zrealizujeme pro vaše maximální pohodlí a efektivitu.
+                </MDBCardText>
+                <MDBCardText>
+                  <a href="./security" className="learn-more">Dozvědět se více</a>
                 </MDBCardText>
               </MDBCardBody>
             </div>
@@ -109,7 +116,7 @@ function mainPage() {
         </MDBCol>
       </MDBRow>
     </>
-  )
+  );
 }
 
-export default mainPage
+export default mainPage;
