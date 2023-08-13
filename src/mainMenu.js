@@ -7,32 +7,34 @@ import {
   MDBNavbarToggler,
   MDBDropdown,
   MDBDropdownToggle,
-  MDBDropdownMenu,
-  MDBDropdownItem,
+  MDBCollapse,
+  MDBNavbarBrand,
   MDBContainer,
   MDBIcon,
-  MDBCollapse,
-  MDBNavbarBrand
+  MDBBtn
 } from "mdb-react-ui-kit";
-import { getOperatorLevel, getUserName, getPartnerName } from './connection.js';
+import { getOperatorLevel } from './connection.js';
 
-export function MainMenu({ setPage, showBasic, setShowBasic, getActiveMenu, renderUserInfo, Logout }) {
+export default function MainMenu({ activePage, setShowBasic, showBasic, setPage }) {
+  function getActiveMenu(aMenuItem) {
+    return (activePage === aMenuItem);
+  }
+
   return (
     <>
-      <MDBNavbar fixed="botom"
+      <MDBNavbar
+        fixed="bottom"
         expand="lg"
         bgColor="white"
         className="mb-1"
-        sticky light
+        sticky
+        light
       >
         <MDBContainer fluid>
-          <MDBNavbarBrand about="ELINET services s.r.o" onClick={() => setPage('main')}>
-            <img src="/images/elinetLogoI.png"
-              height="30"
-              alt="Logo"
-              loading="lazy"
-            />
-          </MDBNavbarBrand>
+        <MDBNavbarBrand about="ELINET services s.r.o" onClick={() => setPage('main')}>
+  <img src="/images/elinetLogoI.png" height="27" alt="Logo" loading="lazy" />
+</MDBNavbarBrand>
+
           <MDBNavbarToggler
             onClick={() => setShowBasic(!showBasic)}
             aria-controls="navbarExample01"
@@ -42,47 +44,38 @@ export function MainMenu({ setPage, showBasic, setShowBasic, getActiveMenu, rend
             <MDBIcon fas icon="bars" />
           </MDBNavbarToggler>
           <MDBCollapse show={showBasic} navbar>
-            <MDBNavbarNav className="my-2 mb-lg-0" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <div>
-                <MDBNavbarItem active={getActiveMenu("network")}>
-                  <MDBNavbarLink className='px-3' onClick={() => setPage('network')}>
-                    IT řešení
-                  </MDBNavbarLink>
-                </MDBNavbarItem>
-                {/* ... Další položky ... */}
-              </div>
-              <MDBNavbarItem active={getActiveMenu("login")}>
-                {getOperatorLevel() === 'N' ?
-                  <MDBBtn className='px-3' color='light' onClick={() => setPage('login')}>
-                    Přihlášení
-                  </MDBBtn>
-                  :
-                  <MDBDropdown>
-                    <MDBDropdownToggle tag='a' className='nav-link' role='button'>
-                      Uživatel
-                    </MDBDropdownToggle>
-                    {getOperatorLevel() === 'A' ?
-                      <MDBDropdownMenu>
-                        {renderUserInfo()}
-                        <MDBDropdownItem divider />
-                        <MDBDropdownItem link onClick={() => setPage('administrace')}>Administrace</MDBDropdownItem>
-                        <MDBDropdownItem link onClick={() => setPage('register')}>Registrace</MDBDropdownItem>
-                        <MDBDropdownItem divider />
-                        <MDBDropdownItem link onClick={Logout}>Odhlášení</MDBDropdownItem>
-                      </MDBDropdownMenu>
-                      :
-                      <MDBDropdownMenu>
-                        {renderUserInfo()}
-                        <MDBDropdownItem divider />
-                        <MDBDropdownItem link onClick={() => setPage('orderlist')}>Seznam zakázek</MDBDropdownItem>
-                        <MDBDropdownItem divider />
-                        <MDBDropdownItem link onClick={Logout}>Odhlášení</MDBDropdownItem>
-                      </MDBDropdownMenu>
-                    }
-                  </MDBDropdown>
-                }
+            <MDBNavbarNav className="my-2 mb-lg-0">
+              <MDBNavbarItem active={getActiveMenu("network")}>
+                <MDBNavbarLink className='px-3' onClick={() => setPage('network')}>IT řešení</MDBNavbarLink>
+              </MDBNavbarItem>
+              <MDBNavbarItem active={getActiveMenu("solar")}>
+                <MDBNavbarLink className='px-3' onClick={() => setPage('solar')}>Fotovoltaika</MDBNavbarLink>
+              </MDBNavbarItem>
+              <MDBNavbarItem active={getActiveMenu("security")}>
+                <MDBNavbarLink className='px-3' onClick={() => setPage('security')}>Zabezpečení</MDBNavbarLink>
+              </MDBNavbarItem>
+              <MDBNavbarItem active={getActiveMenu("about")}>
+                <MDBNavbarLink className='px-3' onClick={() => setPage('about')}>O nás</MDBNavbarLink>
+              </MDBNavbarItem>
+              <MDBNavbarItem active={getActiveMenu("contact")}>
+                <MDBNavbarLink className='px-3' onClick={() => setPage('contact')}>Kontakt</MDBNavbarLink>
               </MDBNavbarItem>
             </MDBNavbarNav>
+            <div>
+              {getOperatorLevel() === 'N' ? (
+                <MDBBtn className='px-3' color='light' onClick={() => setPage('login')}>
+                  Přihlášení
+                </MDBBtn>
+              ) : (
+                <MDBDropdown>
+                  <MDBDropdownToggle tag='a' className='nav-link' role='button'>
+                    Uživatel
+                  </MDBDropdownToggle>
+                  {/* Dropdown menu */}
+                  {/* ... */}
+                </MDBDropdown>
+              )}
+            </div>
           </MDBCollapse>
         </MDBContainer>
       </MDBNavbar>
