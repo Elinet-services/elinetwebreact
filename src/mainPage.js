@@ -5,11 +5,11 @@ import {
   MDBCardText,
   MDBCardImage,
   MDBRow,
-  MDBCol,
+  MDBCol
 } from "mdb-react-ui-kit";
 import "./mainPage.css";
 
-function mainPage() {
+function mainPage({setPage}) {
   return (
     <>
       <MDBRow className="bg-light mb-3">
@@ -24,9 +24,9 @@ function mainPage() {
               />
               <MDBCardBody className="card-text">
                 <MDBCardTitle>
-                  <a href="./network" className="text-reset">
+                  <span onClick={() => setPage('network')} className="like-link text-reset">
                     Specializované IT služby od našeho týmu{" "}
-                  </a>
+                  </span>
                 </MDBCardTitle>
                 <MDBCardText>
                   Naše odborná skupina nabízí komplexní IT služby, které pokrývají
@@ -38,7 +38,7 @@ function mainPage() {
                   potřebám vaší firmy.
                 </MDBCardText>
                 <MDBCardText>
-                  <a href="/network" className="learn-more">Dozvědět se více</a>
+                  <span className='like-link' onClick={() => {setPage('network')}}>Dozvědět se více</span>
                 </MDBCardText>
               </MDBCardBody>
             </div>
@@ -57,9 +57,9 @@ function mainPage() {
               />
               <MDBCardBody className="card-text">
                 <MDBCardTitle>
-                  <a href="./solar" className="text-reset">
+                  <span onClick={() => setPage('solar')} className="like-link text-reset">
                     Kvalitní solární systémy na míru{" "}
-                  </a>
+                  </span>
                 </MDBCardTitle>
                 <MDBCardText className="text-wrap">
                   Poskytujeme komplexní služby v oblasti solární energie, od
@@ -70,8 +70,8 @@ function mainPage() {
                   integrovat s dalšími technologiemi pro maximalizaci účinnosti. 
                   Náš podrobný návrh je navržen tak, aby splnil všechny požadavky pro schválení u&nbsp;distribuční sítě a získání dotací.
                 </MDBCardText>
-                <MDBCardText>
-                  <a href="./solar" className="learn-more">Dozvědět se více</a>
+                <MDBCardText>                  
+                  <span className='like-link' onClick={() => {setPage('solar')}}>Dozvědět se více</span>
                 </MDBCardText>
               </MDBCardBody>
             </div>
@@ -90,10 +90,9 @@ function mainPage() {
               />
               <MDBCardBody className="card-text">
                 <MDBCardTitle>
-                  <a href="./security" className="text-reset">
-                    Moderní zabezpečovací systémy a automatizace pro domy a
-                    kanceláře
-                  </a>
+                  <span onClick={() => setPage('security')} className="like-link text-reset">
+                    Moderní zabezpečovací systémy a automatizace pro domy a kanceláře
+                  </span>
                 </MDBCardTitle>
                 <MDBCardText>
                   Náš tým odborníků nabízí pružné, inovativní řešení v oblasti
@@ -107,7 +106,7 @@ function mainPage() {
                   schválení zrealizujeme pro vaše maximální pohodlí a efektivitu.
                 </MDBCardText>
                 <MDBCardText>
-                  <a href="./security" className="learn-more">Dozvědět se více</a>
+                  <span className='like-link' onClick={() => {setPage('security')}}>Dozvědět se více</span>
                 </MDBCardText>
               </MDBCardBody>
             </div>

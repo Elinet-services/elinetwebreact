@@ -1,4 +1,4 @@
-import ReactDOM from "react-dom"
+import ReactDOM from "react-dom/client"
 import React, { useState, useRef } from "react"
 
 import "@fortawesome/fontawesome-free/css/all.min.css"
@@ -6,6 +6,7 @@ import "mdb-react-ui-kit/dist/css/mdb.min.css"
 import "./index.css"
 
 import {
+  MDBNavbar,
   MDBNavbarNav,
   MDBNavbarItem,
   MDBNavbarLink,
@@ -22,9 +23,10 @@ import {
   MDBCol,
   MDBBtn, MDBModal, MDBModalDialog, MDBModalContent, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBAlert, MDBSpinner,
 } from "mdb-react-ui-kit"
+
 import processRequest, {resetCookies, getOperatorLevel, getUserName, getPartnerName} from './connection.js';
-import MainMenu from "./mainMenu";
-import mainFooter from "./mainFooter"
+
+import MainFooter from "./mainFooter"
 import MainPage from "./mainPage"
 import SolarPage from "./solarPage"
 import SecurityPage from "./securityPage"
@@ -102,14 +104,87 @@ export default function RenderPage()
   } //  renderUserInfo
 
   //  -------------------------------------------------------------------------------
+  function mainMenu() {
+    return (
+      <MDBNavbar
+        fixed="bottom"
+        expand="lg"
+        bgColor="white"
+        className="mb-1"
+        sticky
+        light
+      >
+        <MDBContainer fluid>
+          <MDBNavbarBrand about="ELINET services s.r.o" onClick={() => setPage('main')}>
+            <img src="/images/elinetLogoI.png" height="27" alt="Logo" loading="lazy" />
+          </MDBNavbarBrand>
 
-  
+          <MDBNavbarToggler
+            onClick={() => setShowBasic(!showBasic)}
+            aria-controls="navbarExample01"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <MDBIcon fas icon="bars" />
+          </MDBNavbarToggler>
+          <MDBCollapse show={showBasic} navbar>
+            <MDBNavbarNav className="my-2 mb-lg-0">
+              <MDBNavbarItem active={getActiveMenu("network")}>
+                <MDBNavbarLink className='px-3' onClick={() => setPage('network')}>IT řešení</MDBNavbarLink>
+              </MDBNavbarItem>
+              <MDBNavbarItem active={getActiveMenu("solar")}>
+                <MDBNavbarLink className='px-3' onClick={() => setPage('solar')}>Fotovoltaika</MDBNavbarLink>
+              </MDBNavbarItem>
+              <MDBNavbarItem active={getActiveMenu("security")}>
+                <MDBNavbarLink className='px-3' onClick={() => setPage('security')}>Zabezpečení</MDBNavbarLink>
+              </MDBNavbarItem>
+              <MDBNavbarItem active={getActiveMenu("about")}>
+                <MDBNavbarLink className='px-3' onClick={() => setPage('about')}>O nás</MDBNavbarLink>
+              </MDBNavbarItem>
+              <MDBNavbarItem active={getActiveMenu("contact")}>
+                <MDBNavbarLink className='px-3' onClick={() => setPage('contact')}>Kontakt</MDBNavbarLink>
+              </MDBNavbarItem>
+            </MDBNavbarNav>
+            {getOperatorLevel() === 'N' ? (
+              <MDBBtn className='px-3' color='light' onClick={() => setPage('login')}>
+                Přihlášení
+              </MDBBtn>
+            ) : (
+              <MDBDropdown>
+                <MDBDropdownToggle tag='a' className='nav-link' role='button'>
+                  Uživatel
+                </MDBDropdownToggle>
+                {getOperatorLevel() === 'A' ? 
+                    <MDBDropdownMenu>
+                      {renderUserInfo()}
+                      <MDBDropdownItem divider/>
+                      <MDBDropdownItem link childTag='button' onClick={() => setPage('administrace')}>Administrace</MDBDropdownItem>
+                      <MDBDropdownItem link childTag='button' onClick={() => setPage('register')}>Registrace</MDBDropdownItem>
+                      <MDBDropdownItem divider/>
+                      <MDBDropdownItem link childTag='button' onClick={Logout}>Odhlášení</MDBDropdownItem>
+                    </MDBDropdownMenu>
+                  : 
+                    <MDBDropdownMenu>
+                      {renderUserInfo()}                        
+                      <MDBDropdownItem divider/>
+                      <MDBDropdownItem link childTag='button' onClick={() => setPage('orderlist')}>Seznam zakázek</MDBDropdownItem>
+                      <MDBDropdownItem divider/>
+                      <MDBDropdownItem link childTag='button' onClick={Logout}>Odhlášení</MDBDropdownItem>
+                    </MDBDropdownMenu>
+                  }                  
+              </MDBDropdown>
+            )}
+          </MDBCollapse>
+        </MDBContainer>
+      </MDBNavbar>
+    );
+  }
 
-  
+  //  -------------------------------------------------------------------------------
   function showPage() 
-  {     
+  {
     switch (page) {
-      case 'main':      return <MainPage/>;
+      case 'main':      return <MainPage setPage={setPage}/>;
       case 'network':   return <NetworkPage setLoading={setLoading} setMessage={setResponseMessage} setError={setError} submitAlertMessage={submitAlertMessage}/>;
       case 'solar':     return <SolarPage setLoading={setLoading} setMessage={setResponseMessage} setError={setError} submitAlertMessage={submitAlertMessage}/>;
       case 'security':  return <SecurityPage setLoading={setLoading} setMessage={setResponseMessage} setError={setError} submitAlertMessage={submitAlertMessage}/>;
@@ -121,22 +196,18 @@ export default function RenderPage()
       case 'orderlist': return <OrderList setLoading={setLoading} setMessage={setResponseMessage} setError={setError} submitAlertMessage={submitAlertMessage}/>
       case 'reset':     return <ResetPassword resetToken={URLparams.get('resetToken')} setPage={setPage}
                                               setLoading={setLoading} setMessage={setResponseMessage} setError={setError} submitAlertMessage={submitAlertMessage}/>
-      default: return <MainPage/>;
+      default: return <MainPage setPage={setPage}/>;
     }
   }
 
   //  -------------------------------------------------------------------------------
   return (
-    <MDBContainer>
-      <MainMenu 
-        activePage={page} 
-        setShowBasic={setShowBasic} 
-        showBasic={showBasic} 
-        setPage={setPage} 
-      />
-      {showPage()}
-      {mainFooter()}
-
+    <>
+      <MDBContainer>
+        {mainMenu()}
+        {showPage()}
+        <MainFooter setPage={setPage}/>
+      </MDBContainer>
       {/* Odeslani do DB */}
       <MDBModal show={loading} tabIndex='-1' staticBackdrop>
         <MDBModalDialog size="lg">
@@ -164,7 +235,7 @@ export default function RenderPage()
         >
           {responseMessage}
       </MDBAlert>
-    </MDBContainer>
+    </>
   )
 } //  RenderPage
 
