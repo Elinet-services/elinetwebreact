@@ -63,9 +63,9 @@ export default function mainFooter() {
         className="text-center p-1"
         style={{ backgroundColor: "rgba(0, 0, 0, 0.02)" }}
       >
-        © 2023 Copyright:
-        <a className="text-reset fw-bold" href="https://elinet.cz/">
-          Elinet.cz
+        © 2023 Copyright: 
+        <a className="text-reset fw-bold" href="https://www.elinet.cz/">
+           Elinet.cz
         </a>
       </div>
     </MDBFooter>
