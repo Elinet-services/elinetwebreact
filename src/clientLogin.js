@@ -46,9 +46,9 @@ function ClientLogin(params) {
         if (response.adminData && response.adminData.connection) {
           setLogged(true);
           setCookies(response.adminData.connection);
-          //setTimeout(() => {
-          //  window.location.replace('/');
-          //}, 2000);
+          setTimeout(() => {
+            window.location.replace('/');
+          }, 2000);
         }
       }
     }

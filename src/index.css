@@ -39,3 +39,15 @@ li.autocomplete-no-results {
 .navbar-nav .active a.nav-link {
   color: var(--mdb-navbar-active-color);
 }
+
+span.like-link {
+  color: var(--mdb-link-color);
+  cursor: pointer;
+}
+
+footer {
+  font-size: 0.8rem;
+}
+footer h6 {
+  font-size: 0.9rem;
+}

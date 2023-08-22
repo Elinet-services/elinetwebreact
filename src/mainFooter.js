@@ -5,62 +5,61 @@ import {
   MDBCol
 } from "mdb-react-ui-kit";
 
-export default function mainFooter() {
+export default function mainFooter({setPage}) {
   return (
     <MDBFooter
       className="pt-1 pb-1"
       style={{ backgroundColor: "rgba(0, 0, 0, 0.05)" }}
     >
       <section className="px-3">
-        <MDBContainer className="text-center text-md-start mt-1 mb-1">
-          <MDBRow className="mt-1">
-            <MDBCol md="3" lg="4" xl="3" className="mx-auto mb-2">
-              <h6 className="fw-bold mb-2" style={{ fontSize: '0.9rem' }}>
+        <MDBContainer className="text-md-start" id='footer'>
+          <MDBRow className="my-2">
+            <MDBCol md="4" lg="4" xl="3" className="mx-auto my-2">
+              <h6 className="fw-bold mb-2">
                 Elinet services s.r.o.
               </h6>
-              <p style={{ fontSize: '0.8rem' }}>
+              <span>
                 Partner pro IT malých a středních společností, dodavatel
                 solárních elektráren a zabezpečnení objektů
-              </p>
+              </span>
             </MDBCol>
 
-            <MDBCol md="2" lg="2" xl="2" className="mx-auto mb-2">
-              <h6 className="text-uppercase fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Produkty</h6>
-              <p style={{ fontSize: '0.8rem' }}><a href="./solar" className="text-reset">Solární elektárny</a></p>
-              <p style={{ fontSize: '0.8rem' }}><a href="./network" className="text-reset">Síťová řešení</a></p>
-              <p style={{ fontSize: '0.8rem' }}><a href="./security" className="text-reset">Zabezpečení</a></p>
+            <MDBCol md="2" lg="2" xl="2" className="mx-auto my-2">
+              <h6 className="text-uppercase fw-bold mb-2">Produkty</h6>
+              <span className='like-link text-reset' onClick={() => {setPage('solar')}}>Solární elektárny</span><br/>
+              <span className='like-link text-reset' onClick={() => {setPage('network')}}>Síťová řešení</span><br/>
+              <span className='like-link text-reset' onClick={() => {setPage('security')}}>Zabezpečení</span><br/>
             </MDBCol>
 
-            <MDBCol md="3" lg="2" xl="2" className="mx-auto mb-2">
-              <h6 className="text-uppercase fw-bold mb-2" style={{ fontSize: '0.9rem' }}>O společnosti</h6>
-              <p style={{ fontSize: '0.8rem' }}><a href="./about" className="text-reset">O nás</a></p>
-              <p style={{ fontSize: '0.8rem' }}><a href="./contact" className="text-reset">Kontakty</a></p>
+            <MDBCol md="3" lg="2" xl="2" className="mx-auto my-2">
+              <h6 className="text-uppercase fw-bold mb-2">O společnosti</h6>
+              <span className='like-link text-reset' onClick={() => {setPage('about')}}>O nás</span><br/>
+              <span className='like-link text-reset' onClick={() => {setPage('contact')}}>Kontakty</span><br/>
             </MDBCol>
 
-            <MDBCol md="4" lg="3" xl="3" className="mx-auto mb-2">
+            <MDBCol md="3" lg="4" xl="3" className="mx-auto my-2">
               <MDBRow>
                 <MDBCol md={12}>
-                  <h6 className="text-uppercase fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Adresa</h6>
+                  <h6 className="text-uppercase fw-bold mb-2">Adresa</h6>
                 </MDBCol>
               </MDBRow>
-              <MDBRow className="mb-2">
-                <MDBCol md={10} style={{ fontSize: '0.8rem' }}>
+              <MDBRow className="">
+                <MDBCol md={10}>
                   Kaprova 42/14, Staré Město,
                   <br />
                   110 00 Praha
                 </MDBCol>
-                <MDBCol md={10} style={{ fontSize: '0.8rem' }}><a href='mailto:info@elinet.com'>info@elinet.com</a></MDBCol>
+                <MDBCol md={10}><a href='mailto:info@elinet.com'>info@elinet.com</a></MDBCol>
 
-                <MDBCol md={10} style={{ fontSize: '0.8rem' }}><a href='tel:+420776684729'>+ 420 776 684 729</a></MDBCol>
+                <MDBCol md={10}><a href='tel:+420776684729'>+ 420 776 684 729</a></MDBCol>
 
-                <MDBCol md={10} style={{ fontSize: '0.8rem' }}>IČ: 02199360, DIČ: CZ 02199360</MDBCol>
+                <MDBCol md={10}>IČ: 02199360, DIČ:&nbsp;CZ&nbsp;02199360</MDBCol>
               </MDBRow>
             </MDBCol>
           </MDBRow>
         </MDBContainer>
       </section>
-      <div
-        className="text-center p-1"
+      <div className="text-center p-1"
         style={{ backgroundColor: "rgba(0, 0, 0, 0.02)" }}
       >
         © 2023 Copyright: 
