@@ -44,16 +44,13 @@ export default function mainFooter({setPage}) {
                 </MDBCol>
               </MDBRow>
               <MDBRow className="">
+              <MDBCol md={10}>Elinet services s.r.o.</MDBCol>
                 <MDBCol md={10}>
                   Kaprova 42/14, Staré Město,
                   <br />
                   110 00 Praha
                 </MDBCol>
-                <MDBCol md={10}><a href='mailto:info@elinet.com'>info@elinet.com</a></MDBCol>
-
-                <MDBCol md={10}><a href='tel:+420776684729'>+ 420 776 684 729</a></MDBCol>
-
-                <MDBCol md={10}>IČ: 02199360, DIČ:&nbsp;CZ&nbsp;02199360</MDBCol>
+                
               </MDBRow>
             </MDBCol>
           </MDBRow>
