@@ -239,5 +239,12 @@ export default function RenderPage()
   )
 } //  RenderPage
 
-const root = ReactDOM.createRoot(document.getElementById("root"))
-root.render(<RenderPage />)
+let container = null;
+
+document.addEventListener('DOMContentLoaded', function(event) {
+  if (!container) {
+    container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container)
+    root.render(<RenderPage />);
+  }
+});
