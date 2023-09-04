@@ -1,4 +1,4 @@
-const serverURL = "https://script.google.com/macros/s/AKfycbyqt8G2TVvB1P2Y8pVatqnRpj2p3gBbgcGLANjdtGbD7CGoipkTAr3X0vWaLfEoR0OF/exec";
+const serverURL = "https://script.google.com/macros/s/AKfycbyM8jHAwGFxcj2QwxPkUJQ434bRrpmHylxhog8SfiKVoLm_BoO6Tzx70zyP8TPTmOeGUQ/exec";
 const cookieTimeout = 60;   //  platnost cookie v minutach
 
 export function getOperatorLevel() {   //  N - none; U - User; A - Admin
