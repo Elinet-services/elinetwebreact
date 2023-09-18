@@ -102,12 +102,11 @@ export default async function processRequest(formData, source, setLoading, setMe
         if (response.ok) {
             return response.json()
         } else {
-            isError = true;
-            return { message: "Požadavek se nepodařilo odeslat" }
+            return { message: "Požadavek se nepodařilo odeslat", isError: true }
         }
     })
     .then((responseData) => {
-        console.log(responseData);
+        //  console.log(responseData);
         isError         = responseData.isError;
         responseMessage = responseData.message;
         adminData       = responseData.adminData;

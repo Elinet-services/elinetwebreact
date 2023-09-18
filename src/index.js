@@ -247,4 +247,5 @@ document.addEventListener('DOMContentLoaded', function(event) {
     const root = ReactDOM.createRoot(container)
     root.render(<RenderPage />);
   }
+  document.documentElement.lang = 'cs';
 });
