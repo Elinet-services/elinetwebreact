@@ -194,7 +194,7 @@ function Administrace(params)
 
     for (let key in documentFormValue) {
       formData.append(key, documentFormValue[key])
-      console.log(key +' - '+ documentFormValue[key])
+      //  console.log(key +' - '+ documentFormValue[key])
     }
     toggleShowDocumentDetail();
     callDB(formData);
