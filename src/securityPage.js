@@ -12,11 +12,7 @@ import ContactForm from "./form"
 function securityPage(params) {
   return (
     <MDBCard>
-      <MDBCardImage
-        src="images/beispielinstallation.jpg"
-        position="top"
-        alt="Zabezpečení"
-      />
+      <MDBCardImage src="images/EZS.png" position="top" alt="Zabezpečení" />
       <MDBCardBody>
         <MDBCardTitle>Zabezpečení</MDBCardTitle>
         <MDBRow>
@@ -45,7 +41,13 @@ function securityPage(params) {
             </MDBRow>
           </MDBCol>
           <MDBCol md={4}>
-            <ContactForm source={'security'} setLoading={params.setLoading} setMessage={params.setMessage} setError={params.setError} submitAlertMessage={params.submitAlertMessage}/>
+            <ContactForm
+              source={"security"}
+              setLoading={params.setLoading}
+              setMessage={params.setMessage}
+              setError={params.setError}
+              submitAlertMessage={params.submitAlertMessage}
+            />
           </MDBCol>
         </MDBRow>
       </MDBCardBody>
@@ -53,4 +55,4 @@ function securityPage(params) {
   )
 }
 
-export default securityPage;
+export default securityPage

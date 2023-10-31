@@ -4,7 +4,7 @@ import {
   MDBCardTitle,
   MDBCardImage,
   MDBRow,
-  MDBCol
+  MDBCol,
 } from "mdb-react-ui-kit"
 
 import ContactForm from "./form"
@@ -13,7 +13,7 @@ function contactPage(params) {
   return (
     <MDBCard>
       <MDBCardImage
-        src="/images/contact.png"
+        src="/images/Contact.png"
         position="top"
         alt="Elinet services - kontakty"
       />
@@ -23,14 +23,21 @@ function contactPage(params) {
           <MDBCol md={9}>
             <MDBRow>
               <MDBCol>
-                Kontaktujte nás ...<br/>
-                telefonem nebo emailem<br/>
-                a jinak jsou kontaktni informace dole v paticce
+                Kontaktujte nás ...
+                <br />
+                telefonem nebo emailem
+                <br />a jinak jsou kontaktni informace dole v paticce
               </MDBCol>
             </MDBRow>
           </MDBCol>
           <MDBCol md={3}>
-            <ContactForm source={'contact'} setLoading={params.setLoading} setMessage={params.setMessage} setError={params.setError} submitAlertMessage={params.submitAlertMessage}/>
+            <ContactForm
+              source={"contact"}
+              setLoading={params.setLoading}
+              setMessage={params.setMessage}
+              setError={params.setError}
+              submitAlertMessage={params.submitAlertMessage}
+            />
           </MDBCol>
         </MDBRow>
       </MDBCardBody>
@@ -38,4 +45,4 @@ function contactPage(params) {
   )
 }
 
-export default contactPage;
+export default contactPage

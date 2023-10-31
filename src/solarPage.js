@@ -64,7 +64,13 @@ function solarPage(params) {
             </MDBRow>
           </MDBCol>
           <MDBCol md={4}>
-            <ContactForm source={'solar'} setLoading={params.setLoading} setMessage={params.setMessage} setError={params.setError} submitAlertMessage={params.submitAlertMessage}/>
+            <ContactForm
+              source={"solar"}
+              setLoading={params.setLoading}
+              setMessage={params.setMessage}
+              setError={params.setError}
+              submitAlertMessage={params.submitAlertMessage}
+            />
           </MDBCol>
         </MDBRow>
       </MDBCardBody>
@@ -72,4 +78,4 @@ function solarPage(params) {
   )
 }
 
-export default solarPage;
+export default solarPage
