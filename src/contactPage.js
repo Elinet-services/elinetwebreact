@@ -23,10 +23,20 @@ function contactPage(params) {
           <MDBCol md={9}>
             <MDBRow>
               <MDBCol>
-                Kontaktujte nás ...
+                V případě, že nechcete využít kontaktní formulář na našich
+                stránkách, je možno nás kontaktovat na níže uvedených spojeních.
                 <br />
-                telefonem nebo emailem
-                <br />a jinak jsou kontaktni informace dole v paticce
+                Telefon: +420 776 684 729
+                <br />
+                E-mail: info@elinet.cz
+                <br />
+                Adresa: Kaprova 42/14, Staré Město, 110 00 Praha
+                <br />
+                IČ: 02199360
+                <br />
+                DIČ: CZ02199360
+                <br />
+                Provozní doba: Po - Pá: 9:00 - 17:00
               </MDBCol>
             </MDBRow>
           </MDBCol>

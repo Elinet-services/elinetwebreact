@@ -106,7 +106,7 @@ function mainPage({ setPage }) {
           <MDBCard className="h-100 card-content">
             <div className="d-flex flex-row align-items-start">
               <MDBCardImage
-                src="images/EZS.png"
+                src="images/EZS_small.png"
                 position="top"
                 alt="Zabezpečení"
                 className="card-image"
